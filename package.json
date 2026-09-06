@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
+    "dev": "bun run sync:maplibre-worker && next dev --turbopack",
+    "build": "bun run sync:maplibre-worker && next build",
     "start": "next start",
     "check": "biome check --write .",
     "ci:lint": "biome ci .",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "bun test",
-    "fixtures:refresh": "bun run scripts/refresh-fixtures.ts"
+    "fixtures:refresh": "bun run scripts/refresh-fixtures.ts",
+    "sync:maplibre-worker": "bun run scripts/sync-maplibre-worker.ts"
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
