@@ -39,7 +39,7 @@ export async function fetchJson<T>(url: string, schema: ZodType<T>): Promise<Res
   try {
     const parsed = schema.safeParse(JSON.parse(text.data))
     if (!parsed.success) return fail('parse', url)
-    return ok(parsed.data, url)
+    return ok(parsed.data, url, text.fetchedAt)
   } catch {
     return fail('parse', url)
   }
