@@ -1,3 +1,4 @@
+import { Waves } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { BMKG_URL } from '@/lib/urls'
@@ -25,7 +26,10 @@ export async function CoastalCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('heading')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Waves aria-hidden="true" className="size-5 shrink-0" />
+          {t('heading')}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
         {POINTS.map((point) => (
