@@ -30,7 +30,7 @@ export async function HeaderStatusBadge() {
     return (
       <a
         aria-label={t('unavailableLink')}
-        className="shrink-0"
+        className="inline-flex min-h-11 shrink-0 items-center"
         href={ACTIVITY_URL}
         rel="noreferrer"
         target="_blank"

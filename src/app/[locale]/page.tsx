@@ -8,6 +8,16 @@ import { MapSkeleton, StatusSkeleton, TimelineSkeleton } from '@/components/skel
 import { StatusCard } from '@/components/status-card'
 import type { Locale } from '@/lib/format'
 
+// Bounds how stale a cached page's render-time-computed relative times
+// (formatRelative in src/lib/format.ts) can get: without this, the static
+// shell is generated once at build and served stale-while-revalidate
+// indefinitely, so a cold visit after an idle period can render "updated
+// now" over data that is actually hours old. 60s matches the <AutoRefresh />
+// client-side refresh cadence. The fetch-level cache (300s, see
+// src/lib/sources/http.ts) is unaffected -- most of these revalidations
+// reuse already-cached upstream responses rather than re-fetching MAGMA.
+export const revalidate = 60
+
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
