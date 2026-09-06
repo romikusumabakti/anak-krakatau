@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { TOUCH_TARGET } from '@/lib/touch-target'
 
 const OPTIONS = [
   { value: 'system', Icon: Monitor },
@@ -25,7 +26,7 @@ export function ThemeToggle() {
     <DropdownMenu>
       <DropdownMenuTrigger
         render={
-          <Button variant="ghost" size="sm" className="min-h-11 min-w-11" aria-label={t('label')} />
+          <Button variant="ghost" size="icon" className={TOUCH_TARGET} aria-label={t('label')} />
         }
       >
         {/* Swapped by CSS rather than by reading the resolved theme, so the

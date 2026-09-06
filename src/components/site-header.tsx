@@ -16,7 +16,11 @@ export function SiteHeader() {
             <HeaderStatusBadge />
           </Suspense>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        {/* gap-3 is load-bearing, not spacing taste: both controls render at
+            32px with an invisible 44px hit area, and 12px of separation is
+            exactly what stops those areas overlapping and routing a tap to
+            the wrong control. */}
+        <div className="flex shrink-0 items-center gap-3">
           <LocaleSwitcher />
           <ThemeToggle />
         </div>
