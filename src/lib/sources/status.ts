@@ -1,4 +1,5 @@
 import { parse } from 'node-html-parser'
+import { cache } from 'react'
 import { fetchText } from './http'
 import { fail, ok, type Result } from './types'
 import { MONTHS_ID, wibToDate } from './wib'
@@ -98,7 +99,17 @@ export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'
   }
 }
 
-export async function getStatus(): Promise<Result<VolcanoStatus>> {
+/**
+ * Wrapped in React's `cache()` so the header badge and the status card --
+ * two independent call sites reading the same request -- share one
+ * in-flight call instead of issuing two live requests to MAGMA. This is
+ * required rather than incidental: `fetchText` passes a fresh
+ * `AbortSignal.timeout(...)` on every call, and a distinct signal instance
+ * defeats Next.js's own fetch-level request memoization (which compares
+ * the full options object), so without this wrapper each render doubles
+ * the upstream hit.
+ */
+export const getStatus = cache(async (): Promise<Result<VolcanoStatus>> => {
   const activity = await fetchText(ACTIVITY_URL)
   if (!activity.ok) return activity
 
@@ -112,4 +123,4 @@ export async function getStatus(): Promise<Result<VolcanoStatus>> {
   if (!status) return fail('parse', reportUrl)
 
   return ok({ ...status, reportUrl }, reportUrl)
-}
+})

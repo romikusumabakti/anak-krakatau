@@ -1,4 +1,5 @@
 import { parse } from 'node-html-parser'
+import { cache } from 'react'
 import { fetchText } from './http'
 import { fail, ok, type Result } from './types'
 
@@ -71,10 +72,14 @@ export function parseVona(html: string): VonaNotice[] {
   return notices.sort((a, b) => b.issuedAt.getTime() - a.issuedAt.getTime())
 }
 
-export async function getVonaNotices(): Promise<Result<VonaNotice[]>> {
+// Wrapped in React's `cache()` for the same reason as `getStatus`: a fresh
+// AbortSignal on every `fetchText` call defeats Next.js's fetch memoization,
+// so any future call site sharing this render (e.g. a timeline card) would
+// otherwise double the upstream hit to MAGMA's VONA feed.
+export const getVonaNotices = cache(async (): Promise<Result<VonaNotice[]>> => {
   const html = await fetchText(VONA_URL)
   if (!html.ok) return html
   const notices = parseVona(html.data)
   if (notices.length === 0) return fail('parse', VONA_URL)
   return ok(notices, VONA_URL)
-}
+})
