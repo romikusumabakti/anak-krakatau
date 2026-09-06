@@ -21,7 +21,6 @@
         "name": "next"
       }
     ],
-    "types": ["bun", "node", "react", "react-dom"],
     "paths": {
       "@/*": ["./src/*"]
     }
