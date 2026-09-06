@@ -62,7 +62,8 @@
     "directionUnreadable": "We could not read a drift direction from the latest notice, so none is drawn. This does not mean no ash cloud was reported.",
     "legendHeading": "Legend",
     "legendSector": "Amber wedge: indicative drift direction, read from the VONA movement phrase — not a measured ash boundary.",
-    "legendHazard": "Red ring: the official exclusion radius stated in the PVMBG report."
+    "legendHazard": "Red ring: the official exclusion radius stated in the PVMBG report.",
+    "renderUnavailable": "The map could not be drawn on this device. That says nothing about the volcano — the drift direction is described below and in the original notice."
   },
   "source": {
     "label": "Source",
