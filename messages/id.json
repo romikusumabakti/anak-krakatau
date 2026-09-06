@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "title": "Anak Krakatau — Status Terkini",
+    "description": "Tingkat aktivitas, notice abu vulkanik, dan linimasa erupsi Gunung Anak Krakatau."
+  },
+  "disclaimer": {
+    "text": "Bukan sumber resmi. Selalu ikuti MAGMA Indonesia, BMKG, dan BNPB.",
+    "link": "Buka MAGMA Indonesia"
+  },
+  "status": {
+    "heading": "Status saat ini",
+    "hazardRadius": "Jangan mendekat dalam radius {km} km dari kawah aktif",
+    "hazardRadiusUnknown": "Radius bahaya tidak disebutkan dalam laporan terbaru.",
+    "aviationColour": "Kode warna penerbangan",
+    "aviationColourUnknown": "Tidak dikenali",
+    "ashTop": "Puncak kolom abu",
+    "aboveSummit": "di atas puncak",
+    "notObserved": "Kolom abu tidak teramati",
+    "levels": { "1": "Normal", "2": "Waspada", "3": "Siaga", "4": "Awas" }
+  },
+  "timeline": {
+    "heading": "Aktivitas terkini",
+    "ongoing": "Masih berlangsung",
+    "empty": "Belum ada kejadian terbaru."
+  },
+  "preparedness": {
+    "heading": "Jika abu turun di sekitar Anda",
+    "mask": {
+      "title": "Pakai masker yang tepat",
+      "body": "Gunakan masker N95 atau KN95 di luar ruangan. Masker kain tidak menahan abu vulkanik."
+    },
+    "indoors": {
+      "title": "Tutup rumah",
+      "body": "Tutup jendela, pintu, dan ventilasi. Bawa hewan peliharaan ke dalam."
+    },
+    "water": {
+      "title": "Tutup air dan makanan",
+      "body": "Tutup tandon air terbuka dan cuci bahan makanan sebelum dimasak."
+    },
+    "driving": {
+      "title": "Kurangi berkendara",
+      "body": "Abu membuat jalan licin dan jarak pandang turun. Jangan pakai wiper pada abu kering."
+    },
+    "contact": {
+      "title": "Kontak darurat",
+      "body": "Call center BNPB 117. Hubungi BPBD setempat untuk informasi evakuasi."
+    }
+  },
+  "map": {
+    "heading": "Arah sebaran abu",
+    "sectorCaption": "Hanya indikasi arah, digambar dari frasa gerak pada VONA — bukan batas awan abu yang otoritatif.",
+    "noSector": "Notice terbaru menyatakan kolom abu tidak teramati, sehingga arah tidak digambar."
+  },
+  "source": {
+    "label": "Sumber",
+    "updated": "diperbarui {time}",
+    "unavailable": "Sumber tidak tersedia",
+    "openOriginal": "Buka laporan asli"
+  },
+  "theme": { "label": "Tema", "system": "Sistem", "light": "Terang", "dark": "Gelap" },
+  "locale": { "label": "Bahasa", "en": "English", "id": "Bahasa Indonesia" }
+}
