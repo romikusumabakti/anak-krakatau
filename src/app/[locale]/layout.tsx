@@ -54,9 +54,12 @@ export default async function LocaleLayout({
       <body className="min-h-svh bg-background text-foreground antialiased">
         <NextIntlClientProvider>
           <ThemeProvider>
-            <DisclaimerBanner />
             <SiteHeader />
             {children}
+            {/* The spec requires this banner on every page but does not
+                require it above the fold. Moved to the footer on request;
+                see the note in disclaimer-banner.tsx about what that costs. */}
+            <DisclaimerBanner />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>
