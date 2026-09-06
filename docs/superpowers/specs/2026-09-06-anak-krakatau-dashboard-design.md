@@ -31,13 +31,27 @@ Hasil probe langsung terhadap sumber data (2026-09-06):
 
 | Sumber | Endpoint | Hasil | Catatan |
 |---|---|---|---|
-| MAGMA API resmi | `magma.esdm.go.id/api/v1/magma-var/evaluasi` | `401` | Butuh auth, tidak ada pendaftaran publik. **Tidak dipakai.** |
-| MAGMA halaman publik | `magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas` | `200`, 48KB HTML | Status level resmi. Perlu scraping. |
-| Darwin VAAC | `bom.gov.au/products/IDD41270.shtml` | `200`, 28KB | **`403` tanpa header User-Agent.** Advisory teks: tinggi & arah abu. |
-| Smithsonian GVP | `webservices.volcano.si.edu/geoserver/GVP-VOTW/ows` (WFS) | `200`, JSON | Terstruktur & stabil. Krakatau = `Volcano_Number` 262000, koordinat `105.4233, -6.1009`. |
-| BMKG TEWS | `data.bmkg.go.id/DataMKG/TEWS/autogempa.json` | `200`, JSON | Gempa terkini; dipakai sebagai konteks seismik Selat Sunda. |
+| MAGMA VONA (Anak Krakatau) | `magma.esdm.go.id/v1/vona?code=KRA` | `200`, 12KB HTML | **Sumber utama data abu.** 15 notice terbaru, format ICAO bernomor. |
+| MAGMA tingkat aktivitas | `magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas` | `200`, 48KB HTML | Level siaga + tautan bertanda tangan ke laporan terbaru. |
+| MAGMA laporan aktivitas | `magma.esdm.go.id/v1/gunung-api/laporan/<id>?signature=<sig>` | `200` (`403` tanpa `signature`) | Level, radius rekomendasi, koordinat, elevasi. `signature` diterbitkan di HTML tingkat aktivitas. |
+| MAGMA informasi letusan | `magma.esdm.go.id/v1/gunung-api/informasi-letusan/KRA` | `200`, 51KB HTML | Timeline kejadian erupsi, narasi Indonesia, waktu WIB. |
+| Smithsonian GVP (WFS) | `webservices.volcano.si.edu/geoserver/GVP-VOTW/ows` | `200`, JSON | Krakatau = `Volcano_Number` 262000, koordinat `105.4233, -6.1009`. |
+| Smithsonian GVP (RSS mingguan) | `volcano.si.edu/news/WeeklyVolcanoRSS.xml` | `200`, XML | Narasi Inggris mingguan. Tertinggal beberapa hari — konteks, bukan status langsung. |
+| BMKG TEWS | `data.bmkg.go.id/DataMKG/TEWS/autogempa.json` | `200`, JSON | Gempa terkini; konteks seismik Selat Sunda. |
 
-Konsekuensi: **dua dari empat sumber adalah HTML scraping.** Struktur halaman
+**Darwin VAAC (BoM) ditolak setelah pengujian.** `bom.gov.au/products/IDD41270.shtml`
+mengembalikan `200` tetapi isinya "This Volcanic Ash Advisory does not currently
+exist" — halaman slot kosong. Daftar advisory `IDD41400.shtml` mengembalikan
+"You do not have the correct authorisation to access this page". Produk advisory
+BoM berada di balik autentikasi dan tidak bisa dipakai.
+
+VONA menggantikannya dan lebih baik di setiap sisi: diterbitkan PVMBG sendiri
+(otoritas resmi Indonesia untuk gunung ini), berbahasa Inggris, dan memakai
+format ICAO bernomor `(2)`–`(16)` yang jauh lebih stabil daripada struktur tabel
+HTML. Halaman daftar sudah memuat data inti, sehingga fetch ke halaman detail
+bertanda tangan tidak diperlukan untuk jalur utama.
+
+Konsekuensi: **sebagian besar sumber adalah HTML scraping.** Struktur halaman
 bisa berubah tanpa pemberitahuan. Ketahanan terhadap kegagalan parse adalah
 persyaratan utama, bukan penyempurnaan.
 
@@ -87,10 +101,11 @@ dirawat; itu keputusan terpisah untuk v2.
 
 ```
 lib/sources/types.ts
-lib/sources/magma.ts
-lib/sources/vaac.ts
-lib/sources/gvp.ts
-lib/sources/bmkg.ts
+lib/sources/vona.ts       notice VONA (tinggi & arah abu, aviation colour code)
+lib/sources/status.ts     tingkat aktivitas + laporan bertanda tangan
+lib/sources/eruptions.ts  timeline informasi letusan
+lib/sources/gvp.ts        metadata WFS + narasi mingguan RSS
+lib/sources/bmkg.ts       gempa Selat Sunda
 ```
 
 Setiap adapter mengekspor satu fungsi async yang mengembalikan `Result`:
@@ -105,8 +120,9 @@ Aturan yang tidak bisa ditawar:
 
 - Adapter **tidak pernah melempar** ke lapisan UI. Semua kegagalan menjadi
   `ok: false`.
-- Setiap `fetch` memakai `AbortSignal.timeout(8000)` dan header `User-Agent`
-  eksplisit. Tanpa User-Agent, BoM mengembalikan `403` — sudah terbukti.
+- Setiap `fetch` memakai `AbortSignal.timeout(8000)`, header `User-Agent`
+  eksplisit, dan `Accept-Encoding: gzip` (MAGMA menyajikan gzip; tanpa
+  dekompresi hasilnya biner — sudah terbukti saat pengujian sumber).
 - Setiap `fetch` memakai `next: { revalidate: 300 }`. Ini membatasi trafik ke
   server pemerintah pada maksimum 12 permintaan per jam per sumber.
 - Hasil parse divalidasi dengan skema Zod sebelum dikembalikan. Kegagalan
@@ -122,13 +138,28 @@ type VolcanoStatus = {
   observedAt: Date
 }
 
-type AshAdvisory = {
-  issuedAt: Date
-  heightFt: number
-  heightM: number
-  movementDeg: number | null
-  movementLabel: string
-  affectedAreas: string[]
+type AviationColour = 'green' | 'yellow' | 'orange' | 'red'
+
+type VonaNotice = {
+  issuedAt: Date          // UTC, dari kolom waktu daftar VONA
+  noticeCode: string      // mis. "20260905/0200Z"
+  colour: AviationColour
+  summary: string         // teks ringkasan apa adanya
+  // null saat notice berbunyi "Ash-cloud is not observed"
+  ashTopFtAsl: number | null
+  ashTopMAsl: number | null
+  ashAboveSummitFt: number | null
+  ashAboveSummitM: number | null
+  movementLabel: string | null   // mis. "north to northeast"
+  detailUrl: string
+}
+
+type EruptionEvent = {
+  occurredAt: Date        // WIB, dirakit dari tanggal Indonesia di narasi
+  narrative: string
+  ongoing: boolean        // "erupsi masih berlangsung"
+  seismicAmplitudeMm: number | null
+  durationSeconds: number | null
 }
 
 type VolcanoMeta = {
@@ -156,11 +187,24 @@ Fungsi parse dipisahkan dari fungsi fetch dan berupa **fungsi murni**:
 `(raw: string) => T`. Ini yang membuatnya bisa diuji terhadap fixture dan
 dikembangkan secara TDD.
 
-- MAGMA: parse tabel HTML tingkat aktivitas, ambil baris Krakatau.
-- VAAC: parse teks advisory Darwin (format teks tetap ICAO), ambil `VA CLD`,
-  ketinggian dalam kaki, arah gerak.
-- GVP: `JSON.parse` atas respons WFS, ambil properti fitur 262000.
+- VONA: pecah daftar menjadi blok `timeline-item`; per blok ambil waktu UTC,
+  aviation colour code, kode notice, dan teks ringkasan. Angka tinggi dan arah
+  gerak diambil dari teks ringkasan dengan regex atas frasa ICAO yang tetap
+  ("Best estimate of ash-cloud top is around N FT (M M) above sea level or
+  N FT (M M) above summit", "Ash cloud moving from X to Y").
+- Status: parse tabel HTML tingkat aktivitas, ambil baris Anak Krakatau beserta
+  URL laporan bertanda tangan, lalu fetch laporan itu untuk level dan radius.
+- Letusan: pecah `informasi-letusan/KRA` menjadi blok `timeline-item`; parse
+  tanggal Indonesia ("Minggu, 06 September 2026, pukul 07:10 WIB") dari narasi,
+  bukan dari label tanggal terpisah — narasinya memuat tanggal lengkap.
+- GVP: `JSON.parse` atas respons WFS untuk metadata; parse RSS mingguan dan
+  saring `<item>` yang judulnya memuat "Krakatau".
 - BMKG: `JSON.parse`, saring gempa dalam radius Selat Sunda.
+
+Data VONA dan angka yang beredar di media bisa berbeda: VONA melaporkan estimasi
+pengamat darat PVMBG, sedangkan angka seperti "50.000 kaki" berasal dari estimasi
+satelit VAAC. Aplikasi menampilkan angka VONA apa adanya dengan atribusi sumber,
+dan **tidak** mencoba merekonsiliasi keduanya.
 
 ## 5. Struktur halaman & rendering
 
@@ -178,13 +222,13 @@ proxy.ts              middleware next-intl (Next 16)
 
 | Bagian | Sumber | Fallback |
 |---|---|---|
-| `StatusCard` — level, radius bahaya, erupsi terakhir | MAGMA + VAAC | `StatusSkeleton` |
-| `Timeline` — advisory & laporan terurut waktu | VAAC | `TimelineSkeleton` |
-| `AshMap` — peta sebaran | GVP + VAAC | `MapSkeleton` |
+| `StatusCard` — level, radius bahaya, aviation colour code, tinggi abu terakhir | status + VONA | `StatusSkeleton` |
+| `Timeline` — kejadian erupsi & notice VONA tergabung, terurut waktu | letusan + VONA | `TimelineSkeleton` |
+| `AshMap` — peta sebaran | GVP WFS + VONA | `MapSkeleton` |
 | `PreparednessCards` — panduan siaga | statis | tanpa Suspense |
 
 Karena tiap bagian punya batas Suspense sendiri, kartu Panduan Siaga tampil
-seketika sementara MAGMA dan VAAC masih diambil. Ini penting: saat darurat,
+seketika sementara sumber MAGMA masih diambil. Ini penting: saat darurat,
 informasi yang paling cepat berguna justru yang paling murah disajikan.
 
 Kesegaran data: satu Client Component kecil (`<AutoRefresh />`) memanggil
@@ -235,11 +279,13 @@ MapLibre GL dengan tile OpenFreeMap, tanpa API key dan tanpa batas kuota:
 
 Gaya peta mengikuti tema aktif. Lapisan: marker Krakatau pada
 `105.4233, -6.1009`, lingkaran radius bahaya 3 km, dan sektor arah sebaran abu
-yang diturunkan dari arah gerak pada advisory VAAC.
+yang diturunkan dari arah gerak pada notice VONA terbaru.
 
 Sektor abu adalah **indikasi arah, bukan poligon otoritatif.** Ia digambar dari
-arah gerak yang disebut advisory, bukan dari koordinat batas awan abu. Peta
-memberi label eksplisit demikian, dan menautkan advisory VAAC aslinya. Menggambar
+frasa arah gerak pada VONA ("moving from north to northeast"), bukan dari
+koordinat batas awan abu. Peta memberi label eksplisit demikian, dan menautkan
+notice VONA aslinya. Saat VONA terbaru berbunyi "Ash-cloud is not observed",
+sektor tidak digambar sama sekali dan peta menyatakan itu. Menggambar
 bentuk yang terlihat presisi dari data yang tidak presisi adalah kesalahan
 desain, bukan penyempurnaan visual.
 
@@ -284,7 +330,8 @@ Kasus uji yang wajib ada per parser:
 1. Masukan normal — mengembalikan nilai yang benar.
 2. Dokumen kosong — mengembalikan kegagalan parse, bukan crash.
 3. Struktur berubah (baris/kolom hilang) — kegagalan parse.
-4. VAAC tanpa advisory aktif — kondisi valid, bukan kesalahan.
+4. VONA berbunyi "Ash-cloud is not observed" — kondisi valid; field tinggi
+   menjadi `null`, bukan `0` dan bukan kesalahan parse.
 5. Timeout dan HTTP non-200 — memetakan ke `reason` yang tepat.
 
 Formatter l10n diuji terpisah: konversi kaki↔kilometer, rendering WIB, waktu
@@ -315,7 +362,8 @@ interaktif yang nyata.
 | Risiko | Dampak | Mitigasi |
 |---|---|---|
 | Struktur HTML MAGMA berubah | Kartu status mati | `Result` + skema Zod; kartu jadi "tidak tersedia"; `fixtures:refresh` mendeteksi lebih awal |
-| BoM memblokir scraping | Timeline & data abu mati | Hormati cache 300 dtk; User-Agent jujur; kartu terdegradasi mandiri |
+| MAGMA jadi satu titik kegagalan tunggal | Tiga dari empat kartu mati sekaligus | Diterima secara sadar: MAGMA adalah otoritas resmi untuk gunung ini; sumber lain berarti data non-otoritatif. GVP RSS tetap memberi konteks independen saat MAGMA tumbang. |
+| `signature` pada URL laporan kedaluwarsa | Level & radius tidak terambil | Signature selalu diambil ulang dari HTML tingkat aktivitas pada setiap siklus revalidate, tidak pernah di-hardcode |
 | Pengguna mengira app ini resmi | Bahaya nyata saat darurat | Banner permanen + tautan sumber di setiap kartu |
 | Bundle MapLibre membengkak | Paint pertama lambat di 4G | Import dinamis `ssr: false`, di luar jalur render kritis |
 | OpenFreeMap tumbang | Peta kosong | Peta gagal mandiri; tiga kartu lain tidak terpengaruh |
