@@ -1,7 +1,5 @@
-// lucide v1 dropped brand icons, so a generic source-code mark rather than
-// a GitHub logo.
-import { Code } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { GitHubIcon } from '@/components/icons/github'
 import { REPOSITORY_URL } from '@/lib/urls'
 
 /**
@@ -27,7 +25,7 @@ export async function SiteFooter() {
         rel="noreferrer"
         target="_blank"
       >
-        <Code aria-hidden="true" className="size-3.5 shrink-0" />
+        <GitHubIcon className="size-3.5 shrink-0" />
         {t('repository')}
       </a>
     </footer>
