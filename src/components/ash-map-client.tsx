@@ -31,6 +31,16 @@ const SECTOR_RADIUS_KM = 120
  */
 const LOAD_TIMEOUT_MS = 15_000
 
+/**
+ * How long to wait for `webglcontextrestored` after the context is lost.
+ *
+ * A browser that intends to restore the context does so within about a
+ * second, so this is generous enough not to discard a map that is coming
+ * back, and short enough that a permanently dead canvas does not sit there
+ * looking like an empty map.
+ */
+const CONTEXT_RESTORE_GRACE_MS = 5_000
+
 export type AshMapClientProps = {
   longitude: number
   latitude: number
@@ -73,6 +83,7 @@ export function AshMapClient({ longitude, latitude, hazardRadiusKm, bearing }: A
     let loaded = false
     let disposed = false
     let deadline: ReturnType<typeof setTimeout>
+    let restoreDeadline: ReturnType<typeof setTimeout> | undefined
 
     // MapLibre builds its canvas and controls inside the container by hand,
     // outside React's knowledge, so switching to the fallback has to tear the
@@ -83,6 +94,7 @@ export function AshMapClient({ longitude, latitude, hazardRadiusKm, bearing }: A
       if (disposed) return
       disposed = true
       clearTimeout(deadline)
+      clearTimeout(restoreDeadline)
       map.remove()
     }
 
@@ -94,6 +106,21 @@ export function AshMapClient({ longitude, latitude, hazardRadiusKm, bearing }: A
     deadline = setTimeout(() => {
       if (!loaded) giveUp()
     }, LOAD_TIMEOUT_MS)
+
+    // A lost WebGL context blanks the canvas without producing an `error`, so
+    // it slips past the guard below and would otherwise leave exactly the
+    // silent empty box this component exists to prevent. Loss is often
+    // transient -- a laptop switching GPUs, power saving, a driver reset -- and
+    // MapLibre rebuilds itself on `webglcontextrestored`, so give the browser a
+    // grace period before replacing a map that is about to come back.
+    map.on('webglcontextlost', () => {
+      clearTimeout(restoreDeadline)
+      restoreDeadline = setTimeout(giveUp, CONTEXT_RESTORE_GRACE_MS)
+    })
+
+    map.on('webglcontextrestored', () => {
+      clearTimeout(restoreDeadline)
+    })
 
     // Only fatal before `load`. Afterwards these are transient tile or glyph
     // failures, and blanking a working map over one missing tile would be
