@@ -38,3 +38,51 @@ test('always reports the source url it was given', async () => {
   const result = await fetchText('https://example.test/d')
   expect(result.sourceUrl).toBe('https://example.test/d')
 })
+
+test('uses Date header from response when present', async () => {
+  const expectedDate = new Date('2026-09-06T12:00:00Z')
+  globalThis.fetch = mock(
+    async () =>
+      new Response('hello', {
+        status: 200,
+        headers: { date: expectedDate.toUTCString() },
+      }),
+  ) as unknown as typeof fetch
+  const result = await fetchText('https://example.test/e')
+  expect(result.ok).toBe(true)
+  if (result.ok) {
+    expect(result.fetchedAt.getTime()).toBe(expectedDate.getTime())
+  }
+})
+
+test('falls back to current time when Date header is missing', async () => {
+  globalThis.fetch = mock(
+    async () => new Response('hello', { status: 200 }),
+  ) as unknown as typeof fetch
+  const result = await fetchText('https://example.test/f')
+  expect(result.ok).toBe(true)
+  if (result.ok) {
+    // Verify fetchedAt is a valid Date with a recent timestamp
+    expect(Number.isNaN(result.fetchedAt.getTime())).toBe(false)
+    expect(result.fetchedAt.getTime()).toBeGreaterThan(Date.now() - 1000)
+    expect(result.fetchedAt.getTime()).toBeLessThanOrEqual(Date.now())
+  }
+})
+
+test('falls back to current time when Date header is unparseable', async () => {
+  globalThis.fetch = mock(
+    async () =>
+      new Response('hello', {
+        status: 200,
+        headers: { date: 'not-a-date' },
+      }),
+  ) as unknown as typeof fetch
+  const result = await fetchText('https://example.test/g')
+  expect(result.ok).toBe(true)
+  if (result.ok) {
+    // Verify fetchedAt is a valid Date with a recent timestamp
+    expect(Number.isNaN(result.fetchedAt.getTime())).toBe(false)
+    expect(result.fetchedAt.getTime()).toBeGreaterThan(Date.now() - 1000)
+    expect(result.fetchedAt.getTime()).toBeLessThanOrEqual(Date.now())
+  }
+})

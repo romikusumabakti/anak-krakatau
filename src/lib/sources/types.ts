@@ -4,10 +4,10 @@ export type Result<T> =
   | { ok: true; data: T; fetchedAt: Date; sourceUrl: string }
   | { ok: false; reason: FailureReason; sourceUrl: string }
 
-export const ok = <T>(data: T, sourceUrl: string): Result<T> => ({
+export const ok = <T>(data: T, sourceUrl: string, fetchedAt?: Date): Result<T> => ({
   ok: true,
   data,
-  fetchedAt: new Date(),
+  fetchedAt: fetchedAt ?? new Date(),
   sourceUrl,
 })
 
