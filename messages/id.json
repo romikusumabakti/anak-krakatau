@@ -62,7 +62,8 @@
     "directionUnreadable": "Kami tidak dapat membaca arah sebaran dari notice terbaru, sehingga arah tidak digambar. Ini bukan berarti kolom abu tidak dilaporkan.",
     "legendHeading": "Keterangan",
     "legendSector": "Area oranye: indikasi arah sebaran abu dari frasa gerak pada VONA — bukan batas awan abu yang terukur.",
-    "legendHazard": "Lingkaran merah: radius bahaya resmi yang disebutkan dalam laporan PVMBG."
+    "legendHazard": "Lingkaran merah: radius bahaya resmi yang disebutkan dalam laporan PVMBG.",
+    "renderUnavailable": "Peta tidak dapat digambar di perangkat ini. Ini tidak berkaitan dengan kondisi gunung — arah sebaran tetap dijelaskan di bawah dan di notice aslinya."
   },
   "source": {
     "label": "Sumber",
