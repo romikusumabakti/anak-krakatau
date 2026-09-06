@@ -102,3 +102,23 @@ the alert level and ash direction cards would go dark while MAGMA was merely
 slow. Singapore is the closest region to the Sunda Strait.
 
 Hobby plans may select any single region, so this works without a paid plan.
+
+### Two things the Vercel build logs revealed
+
+**Direct dependencies are pinned exactly, on purpose.** Vercel's build image
+runs Bun 1.3.14, which cannot read the `lockfileVersion: 2` that Bun 1.4
+writes. It logs `Unknown lockfile version`, warns `Ignoring lockfile`, and
+resolves every dependency fresh. `packageManager: "bun@1.4.0"` does not
+change this. With the lockfile ignored, a caret range would let an untested
+minor release reach production on its own — so every direct dependency is
+pinned to an exact version. Transitive packages can still drift; this only
+removes the largest and most likely source. Once Vercel's image ships Bun
+1.4 the lockfile will be honoured again and the pins simply stop mattering.
+
+**Builds run in `iad1`, not `sin1`.** The `regions` setting places Vercel
+Functions, not the build. So the build-time prerender fetches MAGMA from
+Washington DC, where the trans-Pacific round trip on top of MAGMA's own
+latency often exceeds the 20s timeout — a freshly deployed page can ship
+showing "Source unavailable". This is not a failure state to fix: the first
+ISR revalidation runs in `sin1` and the page heals itself within a minute.
+Observed on the first production deploy and confirmed to recover.
