@@ -27,7 +27,7 @@ export function LocaleSwitcher() {
             <Button variant="ghost" size="icon" className={TOUCH_TARGET} aria-label={t('label')} />
           }
         >
-          <Languages aria-hidden="true" className="size-5" />
+          <Languages aria-hidden="true" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-44">
           {routing.locales.map((locale) => (

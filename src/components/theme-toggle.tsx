@@ -32,8 +32,8 @@ export function ThemeToggle() {
         {/* Swapped by CSS rather than by reading the resolved theme, so the
             correct icon is in the first paint and does not flip after
             hydration. The accessible name lives on the trigger's aria-label. */}
-        <Sun aria-hidden="true" className="size-5 dark:hidden" />
-        <Moon aria-hidden="true" className="hidden size-5 dark:block" />
+        <Sun aria-hidden="true" className="dark:hidden" />
+        <Moon aria-hidden="true" className="hidden dark:block" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         {OPTIONS.map(({ value, Icon }) => (
