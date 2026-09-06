@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
 import { DisclaimerBanner } from '@/components/disclaimer-banner'
+import { SiteFooter } from '@/components/site-footer'
 import { SiteHeader } from '@/components/site-header'
 import { ThemeProvider } from '@/components/theme-provider'
 import { routing } from '@/i18n/routing'
@@ -60,6 +61,7 @@ export default async function LocaleLayout({
                 require it above the fold. Moved to the footer on request;
                 see the note in disclaimer-banner.tsx about what that costs. */}
             <DisclaimerBanner />
+            <SiteFooter />
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

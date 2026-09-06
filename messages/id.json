@@ -104,5 +104,9 @@
     "action": "Jika air laut tiba-tiba surut jauh, atau terdengar dentuman keras dari arah selat, segera menjauh dari pantai ke tempat yang lebih tinggi dan bertahan di sana sampai BMKG menyatakan aman.",
     "authority": "Dashboard ini tidak memantau risiko tsunami. Peringatan tsunami di Indonesia diterbitkan BMKG — ikuti BMKG dan BPBD setempat.",
     "authorityLink": "Buka BMKG"
+  },
+  "footer": {
+    "copyright": "© 2026 Romi Kusuma Bakti",
+    "repository": "Kode sumber"
   }
 }
