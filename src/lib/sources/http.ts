@@ -6,10 +6,26 @@ const USER_AGENT =
 
 export const REVALIDATE_SECONDS = 300
 
+/**
+ * Per-request timeout.
+ *
+ * The original 8s was a guess and it sat inside MAGMA's real latency
+ * distribution: sampling the three endpoints during the September 2026
+ * eruption gave 4.5s-8.8s per request, so roughly half of them aborted and
+ * the alert level and ash direction cards went dark while MAGMA was merely
+ * slow rather than down. `getStatus` compounds it by making two sequential
+ * fetches.
+ *
+ * 20s clears the observed spread with headroom. It does not increase load on
+ * MAGMA: REVALIDATE_SECONDS still caps us at ~12 requests per hour per
+ * source, and a slow response occupies one server render, not a retry.
+ */
+export const REQUEST_TIMEOUT_MS = 20_000
+
 export async function fetchText(url: string): Promise<Result<string>> {
   try {
     const response = await fetch(url, {
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       headers: { 'User-Agent': USER_AGENT, 'Accept-Encoding': 'gzip' },
       next: { revalidate: REVALIDATE_SECONDS },
     })
