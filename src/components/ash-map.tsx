@@ -6,7 +6,7 @@ import { formatRelative, formatWib, type Locale } from '@/lib/format'
 import { bearingFromPhrase } from '@/lib/geo'
 import { getStatus } from '@/lib/sources/status'
 import { ashCloudNotObserved, getVonaNotices } from '@/lib/sources/vona'
-import { VONA_URL } from '@/lib/urls'
+import { ACTIVITY_URL, VONA_URL } from '@/lib/urls'
 
 export async function AshMap({ locale }: { locale: Locale }) {
   const [status, vona] = await Promise.all([getStatus(), getVonaNotices()])
@@ -135,7 +135,7 @@ export async function AshMap({ locale }: { locale: Locale }) {
           fetchedAt={status.fetchedAt}
           label="MAGMA Indonesia"
           locale={locale}
-          url={status.data.reportUrl}
+          url={ACTIVITY_URL}
         />
         {vona.ok ? (
           <SourceFooter

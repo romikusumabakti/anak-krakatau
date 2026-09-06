@@ -117,3 +117,21 @@ test('Indonesian renders Indonesian copy for the unreadable-height state', async
   expect(html).not.toContain('Kolom abu tidak teramati')
   expect(html).toContain('Periode pengamatan')
 })
+
+test('the success-path source link is the stable page, not the signed report', async () => {
+  // The signed report URL is the precise document, but only while its
+  // signature is live. Pages are served from cache for up to a year under
+  // stale-while-revalidate, so a reader clicking through a cached page can
+  // land on a 403 -- reproducing a failure at the moment they were trying to
+  // reach the official source. The activity page always carries a fresh
+  // signed link to the current report, so precision loses to reachability.
+  stubFetch({
+    activity: ok(FIXTURES.activity),
+    report: ok(FIXTURES.report),
+    vona: ok(FIXTURES.vona),
+  })
+  const html = await statusCard()
+  expect(html).toContain('Level III')
+  expect(html).toContain(`href="${ACTIVITY_URL}"`)
+  expect(html).not.toContain('gunung-api/laporan/')
+})
