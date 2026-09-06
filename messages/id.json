@@ -13,7 +13,7 @@
     "hazardRadiusUnknown": "Radius bahaya tidak disebutkan dalam laporan terbaru.",
     "aviationColour": "Kode warna penerbangan",
     "aviationColourUnknown": "Tidak dikenali",
-    "ashTop": "Puncak kolom abu",
+    "ashTop": "Tinggi kolom abu",
     "aboveSummit": "di atas puncak",
     "notObserved": "Kolom abu tidak teramati",
     "levels": { "1": "Normal", "2": "Waspada", "3": "Siaga", "4": "Awas" }
@@ -30,11 +30,11 @@
       "body": "Gunakan masker N95 atau KN95 di luar ruangan. Masker kain tidak menahan abu vulkanik."
     },
     "indoors": {
-      "title": "Tutup rumah",
+      "title": "Tutup rapat rumah",
       "body": "Tutup jendela, pintu, dan ventilasi. Bawa hewan peliharaan ke dalam."
     },
     "water": {
-      "title": "Tutup air dan makanan",
+      "title": "Tutupi tandon air dan makanan",
       "body": "Tutup tandon air terbuka dan cuci bahan makanan sebelum dimasak."
     },
     "driving": {
