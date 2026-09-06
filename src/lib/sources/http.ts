@@ -14,7 +14,19 @@ export async function fetchText(url: string): Promise<Result<string>> {
       next: { revalidate: REVALIDATE_SECONDS },
     })
     if (!response.ok) return fail('http', url)
-    return ok(await response.text(), url)
+
+    // Try to get the fetch time from the Date header
+    let fetchedAt: Date | undefined
+    const dateHeader = response.headers.get('date')
+    if (dateHeader) {
+      const parsedDate = new Date(dateHeader)
+      // Only use if it's a valid Date (not NaN)
+      if (!Number.isNaN(parsedDate.getTime())) {
+        fetchedAt = parsedDate
+      }
+    }
+
+    return ok(await response.text(), url, fetchedAt)
   } catch (error) {
     const name = error instanceof Error ? error.name : ''
     return fail(name === 'TimeoutError' || name === 'AbortError' ? 'timeout' : 'http', url)
