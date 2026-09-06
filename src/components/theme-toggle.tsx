@@ -18,7 +18,11 @@ export function ThemeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="ghost" size="sm" aria-label={t('label')} />}>
+      <DropdownMenuTrigger
+        render={
+          <Button variant="ghost" size="sm" className="min-h-11 min-w-11" aria-label={t('label')} />
+        }
+      >
         {t('label')}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

@@ -19,8 +19,8 @@ export function LocaleSwitcher() {
           aria-current={locale === active ? 'true' : undefined}
           className={
             locale === active
-              ? 'rounded-md px-2 py-1 font-medium underline underline-offset-4'
-              : 'rounded-md px-2 py-1 text-muted-foreground hover:text-foreground'
+              ? 'flex min-h-11 min-w-11 items-center justify-center rounded-md px-2 font-medium underline underline-offset-4'
+              : 'flex min-h-11 min-w-11 items-center justify-center rounded-md px-2 text-muted-foreground hover:text-foreground'
           }
         >
           {locale.toUpperCase()}
