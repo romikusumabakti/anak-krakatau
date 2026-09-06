@@ -58,5 +58,11 @@
     "openOriginal": "Buka laporan asli"
   },
   "theme": { "label": "Tema", "system": "Sistem", "light": "Terang", "dark": "Gelap" },
-  "locale": { "label": "Bahasa", "en": "English", "id": "Bahasa Indonesia" }
+  "locale": { "label": "Bahasa", "en": "English", "id": "Bahasa Indonesia" },
+  "error": {
+    "heading": "Terjadi kesalahan",
+    "body": "Informasi resmi tetap bisa diakses di",
+    "linkLabel": "MAGMA Indonesia",
+    "retry": "Coba lagi"
+  }
 }

@@ -58,5 +58,11 @@
     "openOriginal": "Open the original report"
   },
   "theme": { "label": "Theme", "system": "System", "light": "Light", "dark": "Dark" },
-  "locale": { "label": "Language", "en": "English", "id": "Bahasa Indonesia" }
+  "locale": { "label": "Language", "en": "English", "id": "Bahasa Indonesia" },
+  "error": {
+    "heading": "Something went wrong",
+    "body": "Official information stays available at",
+    "linkLabel": "MAGMA Indonesia",
+    "retry": "Try again"
+  }
 }
