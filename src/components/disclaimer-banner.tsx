@@ -1,4 +1,5 @@
 import { useTranslations } from 'next-intl'
+import { ACTIVITY_URL } from '@/lib/sources/status'
 
 export function DisclaimerBanner() {
   const t = useTranslations('disclaimer')
@@ -10,7 +11,7 @@ export function DisclaimerBanner() {
       <span>{t('text')} </span>
       <a
         className="font-medium underline underline-offset-2"
-        href="https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas"
+        href={ACTIVITY_URL}
         rel="noreferrer"
         target="_blank"
       >
