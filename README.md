@@ -86,3 +86,19 @@ report timed to the wrong zone is worse than no time at all.
 
 - [Design spec](docs/superpowers/specs/2026-09-06-anak-krakatau-dashboard-design.md)
 - [Implementation plan](docs/superpowers/plans/2026-09-06-anak-krakatau-dashboard.md)
+
+## Deploying
+
+The app needs no environment variables and no API keys: every source is a
+public MAGMA page, and the tile provider requires no token.
+
+Vercel Functions are pinned to `sin1` (Singapore) in `vercel.json`. This is
+not a preference. The server fetches MAGMA in Indonesia, and MAGMA is slow
+under eruption load — measured at 4.5–8.8s per request from inside Indonesia
+during the September 2026 eruption, against a 20s timeout. Vercel's default
+region is `iad1` (Washington DC), which would add a trans-Pacific round trip
+to every one of those requests and push the slow tail past the timeout, so
+the alert level and ash direction cards would go dark while MAGMA was merely
+slow. Singapore is the closest region to the Sunda Strait.
+
+Hobby plans may select any single region, so this works without a paid plan.
