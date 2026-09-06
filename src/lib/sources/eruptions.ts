@@ -1,9 +1,8 @@
 import { parse } from 'node-html-parser'
+import { ERUPTIONS_URL } from '@/lib/urls'
 import { fetchText } from './http'
 import { fail, ok, type Result } from './types'
 import { MONTHS_ID, wibToDate } from './wib'
-
-export const ERUPTIONS_URL = 'https://magma.esdm.go.id/v1/gunung-api/informasi-letusan/KRA'
 
 export type EruptionEvent = {
   occurredAt: Date

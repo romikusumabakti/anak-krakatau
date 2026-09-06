@@ -4,8 +4,9 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatRelative, formatWib, type Locale } from '@/lib/format'
 import { mergeTimeline, timelineKey } from '@/lib/merge-timeline'
-import { ERUPTIONS_URL, getEruptions } from '@/lib/sources/eruptions'
-import { getVonaNotices, VONA_URL } from '@/lib/sources/vona'
+import { getEruptions } from '@/lib/sources/eruptions'
+import { getVonaNotices } from '@/lib/sources/vona'
+import { ERUPTIONS_URL, VONA_URL } from '@/lib/urls'
 
 export async function ActivityTimeline({ locale }: { locale: Locale }) {
   const [eruptions, vona] = await Promise.all([getEruptions(), getVonaNotices()])
