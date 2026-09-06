@@ -1,5 +1,6 @@
 import { afterEach, expect, mock, test } from 'bun:test'
-import { fetchText } from '@/lib/sources/http'
+import { z } from 'zod'
+import { fetchJson, fetchText } from '@/lib/sources/http'
 
 const realFetch = globalThis.fetch
 afterEach(() => {
@@ -84,5 +85,23 @@ test('falls back to current time when Date header is unparseable', async () => {
     expect(Number.isNaN(result.fetchedAt.getTime())).toBe(false)
     expect(result.fetchedAt.getTime()).toBeGreaterThan(Date.now() - 1000)
     expect(result.fetchedAt.getTime()).toBeLessThanOrEqual(Date.now())
+  }
+})
+
+test('fetchJson preserves Date header from response', async () => {
+  const expectedDate = new Date('2026-09-06T14:30:00Z')
+  const schema = z.object({ message: z.string() })
+  globalThis.fetch = mock(
+    async () =>
+      new Response(JSON.stringify({ message: 'test' }), {
+        status: 200,
+        headers: { date: expectedDate.toUTCString() },
+      }),
+  ) as unknown as typeof fetch
+  const result = await fetchJson('https://example.test/h', schema)
+  expect(result.ok).toBe(true)
+  if (result.ok) {
+    expect(result.data.message).toBe('test')
+    expect(result.fetchedAt.getTime()).toBe(expectedDate.getTime())
   }
 })
