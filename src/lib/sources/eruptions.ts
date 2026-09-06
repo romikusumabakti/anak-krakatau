@@ -14,8 +14,12 @@ export type EruptionEvent = {
 }
 
 const DATE_RE = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}),\s*pukul\s*(\d{1,2}):(\d{2})\s*WIB/i
-const AMPLITUDE_RE = /amplitudo\s+maksimum\s+([\d.]+)\s*mm/i
-const DURATION_RE = /durasi\s+([\d.]+)\s*detik/i
+// Indonesian text conventionally uses a comma as the decimal separator (e.g.
+// "12,5 mm"). Accept both so a comma-decimal reading normalises to a real
+// number instead of failing to match and silently becoming null, the same
+// way status.ts normalises the hazard radius.
+const AMPLITUDE_RE = /amplitudo\s+maksimum\s+([\d.,]+)\s*mm/i
+const DURATION_RE = /durasi\s+([\d.,]+)\s*detik/i
 const ONGOING_RE = /erupsi\s+masih\s+berlangsung/i
 
 export function parseEruptions(html: string): EruptionEvent[] {
@@ -44,8 +48,8 @@ export function parseEruptions(html: string): EruptionEvent[] {
       ),
       narrative,
       ongoing: ONGOING_RE.test(narrative),
-      seismicAmplitudeMm: amplitude?.[1] ? Number(amplitude[1]) : null,
-      durationSeconds: duration?.[1] ? Number(duration[1]) : null,
+      seismicAmplitudeMm: amplitude?.[1] ? Number(amplitude[1].replace(',', '.')) : null,
+      durationSeconds: duration?.[1] ? Number(duration[1].replace(',', '.')) : null,
     })
   }
 
