@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { ActivityTimeline } from '@/components/activity-timeline'
 import { AshMap } from '@/components/ash-map'
 import { AutoRefresh } from '@/components/auto-refresh'
+import { CoastalCard } from '@/components/coastal-card'
 import { PreparednessCards } from '@/components/preparedness-cards'
 import { MapSkeleton, StatusSkeleton, TimelineSkeleton } from '@/components/skeletons'
 import { StatusCard } from '@/components/status-card'
@@ -49,6 +50,11 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       </section>
       <section className="sm:col-span-2 lg:col-span-5">
         <PreparednessCards />
+      </section>
+      {/* Static, like the preparedness card, and for the same reason: it must
+          be in the first paint even when every MAGMA source is down. */}
+      <section className="sm:col-span-2 lg:col-span-12">
+        <CoastalCard />
       </section>
     </main>
   )
