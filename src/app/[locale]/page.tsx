@@ -18,6 +18,13 @@ import type { Locale } from '@/lib/format'
 // reuse already-cached upstream responses rather than re-fetching MAGMA.
 export const revalidate = 60
 
+// getStatus makes two sequential MAGMA fetches, each budgeted at
+// REQUEST_TIMEOUT_MS (20s), so a worst-case render can take ~40s before the
+// adapters give up and the cards degrade. Stated explicitly rather than left
+// to the host's default, which varies by platform and plan and would
+// otherwise cut a slow-but-recoverable render short.
+export const maxDuration = 60
+
 export default async function Page({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   setRequestLocale(locale)
