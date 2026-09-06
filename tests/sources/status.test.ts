@@ -41,3 +41,49 @@ test('returns null for a document with no level statement', () => {
 test('returns null for an empty document', () => {
   expect(parseReport('')).toBeNull()
 })
+
+test('the visible badge level wins over a script-embedded level string appearing earlier in markup', () => {
+  const contaminated = `
+    <html>
+    <head>
+    <script>
+      var status = 'Level IV (Awas)';
+    </script>
+    </head>
+    <body>
+      <h5><span class="badge bg-orange tx-white">Level II (Waspada)</span></h5>
+      <p>Latitude -6.102°LU, Longitude 105.423°BT dan memiliki ketinggian 157 mdpl</p>
+      <p>radius 2 km dari kawah aktif.</p>
+    </body>
+    </html>
+  `
+  const status = parseReport(contaminated)
+  expect(status?.level).toBe(2)
+  expect(status?.levelLabel).toBe('Waspada')
+})
+
+test('reads radius, elevation, and coordinates from the document, not from the fallback constants', () => {
+  const synthetic = `
+    <html><body>
+      <h5>Level II (Waspada)</h5>
+      <p>Latitude -7.542°LU, Longitude 110.442°BT dan memiliki ketinggian 200 mdpl</p>
+      <p>beraktivitas dalam radius 5 km dari kawah aktif.</p>
+    </body></html>
+  `
+  const status = parseReport(synthetic)
+  expect(status?.hazardRadiusKm).toBe(5)
+  expect(status?.latitude).toBeCloseTo(-7.542, 2)
+  expect(status?.longitude).toBeCloseTo(110.442, 2)
+  expect(status?.elevationM).toBe(200)
+})
+
+test('hazardRadiusKm is null, not a fallback of 3, when a level is stated but no radius sentence exists', () => {
+  const noRadius = `
+    <html><body>
+      <h5>Level II (Waspada)</h5>
+      <p>Latitude -7.542°LU, Longitude 110.442°BT dan memiliki ketinggian 200 mdpl</p>
+    </body></html>
+  `
+  const status = parseReport(noRadius)
+  expect(status?.hazardRadiusKm).toBeNull()
+})
