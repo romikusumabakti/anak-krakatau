@@ -1,6 +1,6 @@
-import { expect, test } from 'bun:test'
+import { afterEach, expect, mock, test } from 'bun:test'
 import { parse } from 'node-html-parser'
-import { parseEruptions } from '@/lib/sources/eruptions'
+import { getEruptions, parseEruptions } from '@/lib/sources/eruptions'
 
 const fixture = await Bun.file('tests/fixtures/informasi-letusan-kra.html').text()
 
@@ -114,4 +114,20 @@ test('still parses whole-number amplitude and duration', () => {
   const [event] = parseEruptions(html)
   expect(event?.seismicAmplitudeMm).toBe(50)
   expect(event?.durationSeconds).toBe(16)
+})
+
+const realFetch = globalThis.fetch
+afterEach(() => {
+  globalThis.fetch = realFetch
+})
+
+test('fetchedAt is the upstream Date header, not render time', async () => {
+  const headerDate = new Date('2026-09-06T08:02:00Z')
+  globalThis.fetch = mock(
+    async () => new Response(fixture, { status: 200, headers: { date: headerDate.toUTCString() } }),
+  ) as unknown as typeof fetch
+  const result = await getEruptions()
+  expect(result.ok).toBe(true)
+  if (!result.ok) return
+  expect(result.fetchedAt.getTime()).toBe(headerDate.getTime())
 })

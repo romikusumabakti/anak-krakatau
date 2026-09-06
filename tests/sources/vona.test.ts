@@ -1,11 +1,25 @@
-import { expect, test } from 'bun:test'
-import { parseVona } from '@/lib/sources/vona'
+import { afterEach, expect, mock, test } from 'bun:test'
+import { parse } from 'node-html-parser'
+import { getVonaNotices, parseVona } from '@/lib/sources/vona'
 
 const fixture = await Bun.file('tests/fixtures/vona-kra.html').text()
 
 test('parses every notice in the list', () => {
-  const notices = parseVona(fixture)
-  expect(notices.length).toBeGreaterThan(5)
+  // A loose floor like ">5" would still pass against a 15-notice fixture if
+  // a markup change silently dropped nine notices -- including the newest,
+  // which the status card and the map both read. Count the parseable
+  // timeline blocks independently and assert equality, as
+  // tests/sources/eruptions.test.ts already does.
+  const parseableCount = parse(fixture)
+    .querySelectorAll('.timeline-item')
+    .filter(
+      (item) =>
+        /\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}/.test(
+          item.querySelector('.timeline-time small')?.text ?? '',
+        ) && Boolean(item.querySelector('.timeline-text')?.text.trim()),
+    ).length
+  expect(parseableCount).toBe(15)
+  expect(parseVona(fixture).length).toBe(parseableCount)
 })
 
 test('reads timestamp, colour, and notice code', () => {
@@ -110,4 +124,20 @@ test('returns an empty array for markup with no notices', () => {
 
 test('returns an empty array for an empty document', () => {
   expect(parseVona('')).toEqual([])
+})
+
+const realFetch = globalThis.fetch
+afterEach(() => {
+  globalThis.fetch = realFetch
+})
+
+test('fetchedAt is the upstream Date header, not render time', async () => {
+  const headerDate = new Date('2026-09-06T09:14:00Z')
+  globalThis.fetch = mock(
+    async () => new Response(fixture, { status: 200, headers: { date: headerDate.toUTCString() } }),
+  ) as unknown as typeof fetch
+  const result = await getVonaNotices()
+  expect(result.ok).toBe(true)
+  if (!result.ok) return
+  expect(result.fetchedAt.getTime()).toBe(headerDate.getTime())
 })
