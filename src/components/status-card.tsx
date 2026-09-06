@@ -12,7 +12,7 @@ import {
 import { getStatus } from '@/lib/sources/status'
 import { ashCloudNotObserved, getVonaNotices } from '@/lib/sources/vona'
 import { COLOUR_STYLES, LEVEL_NUMERALS, LEVEL_STYLES } from '@/lib/status-presentation'
-import { VONA_URL } from '@/lib/urls'
+import { ACTIVITY_URL, VONA_URL } from '@/lib/urls'
 
 export async function StatusCard({ locale }: { locale: Locale }) {
   const [status, vona] = await Promise.all([getStatus(), getVonaNotices()])
@@ -94,7 +94,7 @@ export async function StatusCard({ locale }: { locale: Locale }) {
           fetchedAt={status.fetchedAt}
           label="MAGMA Indonesia"
           locale={locale}
-          url={status.data.reportUrl}
+          url={ACTIVITY_URL}
         />
 
         {/* The aviation colour and ash figures come from a different feed on
