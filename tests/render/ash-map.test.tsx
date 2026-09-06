@@ -1,5 +1,13 @@
 import { afterEach, expect, mock, test } from 'bun:test'
-import { FIXTURES, minutesAgo, render, restoreFetch, stubFetch, vonaDocument } from './harness'
+import {
+  FIXTURES,
+  minutesAgo,
+  render,
+  restoreFetch,
+  sigmetDocument,
+  stubFetch,
+  vonaDocument,
+} from './harness'
 
 // The map body is a client component that dynamically imports MapLibre and
 // its CSS; neither exists outside a bundler. Only the card's chrome -- the
@@ -42,10 +50,54 @@ test('both drawn geometries are named in text, not left as colour alone', async 
     activity: ok(FIXTURES.activity),
     report: ok(FIXTURES.report),
     vona: ok(vonaDocument('Eruption. Ash cloud moving to northwest.')),
+    sigmet: ok(sigmetDocument()),
   })
   const html = await ashMap()
-  expect(html).toContain('Amber wedge:')
+  expect(html).toContain('Shaded area:')
   expect(html).toContain('Red ring:')
+})
+
+test('an active SIGMET names its FIR, altitude band and expiry', async () => {
+  stubFetch({
+    activity: ok(FIXTURES.activity),
+    report: ok(FIXTURES.report),
+    vona: ok(vonaDocument('Eruption. Ash-cloud is not observed.')),
+    sigmet: ok(sigmetDocument()),
+  })
+  const html = await ashMap()
+  expect(html).toContain('WIIF JAKARTA')
+  expect(html).toContain('15000 ft')
+  expect(html).toContain('moving SE 05KT')
+  expect(html).toContain('intensifying')
+  // The distinction the whole feature turns on: this is airspace, not the
+  // ground a reader is standing on.
+  expect(html).toContain('not ashfall where you are standing')
+})
+
+test('says plainly when no ash SIGMET is in force', async () => {
+  stubFetch({
+    activity: ok(FIXTURES.activity),
+    report: ok(FIXTURES.report),
+    vona: ok(vonaDocument('Eruption. Ash-cloud is not observed.')),
+    sigmet: ok('[]'),
+  })
+  const html = await ashMap()
+  expect(html).toContain('No volcanic-ash SIGMET is in force')
+  expect(html).not.toContain('Shaded area:')
+})
+
+test('an expired SIGMET is not drawn as if it were current', async () => {
+  const expired = JSON.parse(sigmetDocument())
+  expired[0].validTimeTo = Math.floor(Date.now() / 1000) - 60
+  stubFetch({
+    activity: ok(FIXTURES.activity),
+    report: ok(FIXTURES.report),
+    vona: ok(vonaDocument('Eruption. Ash-cloud is not observed.')),
+    sigmet: ok(JSON.stringify(expired)),
+  })
+  const html = await ashMap()
+  expect(html).toContain('No volcanic-ash SIGMET is in force')
+  expect(html).not.toContain('WIIF JAKARTA')
 })
 
 test('a movement phrase with no compass point is NOT reported as "no ash cloud observed"', async () => {
@@ -80,4 +132,19 @@ test('a VONA outage is reported as an outage and links out', async () => {
   const html = await ashMap()
   expect(html).toContain('Source unavailable')
   expect(html).toContain('href="https://magma.esdm.go.id/v1/vona?code=KRA"')
+})
+
+test('still draws the ash areas when MAGMA is down', async () => {
+  // The polygons come from a different authority entirely, and MAGMA is the
+  // flakiest source here. Bailing out of the whole card on a status failure
+  // meant the ash areas -- the one thing this card exists to show -- vanished
+  // exactly as often as the volcano's own site hiccuped.
+  stubFetch({ activity: null, report: null, vona: null, sigmet: ok(sigmetDocument()) })
+  const html = await ashMap()
+  expect(html).toContain('WIIF JAKARTA')
+  expect(html).toContain('Shaded area:')
+  // No exclusion ring, because its radius is a live instruction we no longer
+  // have -- and that omission is stated rather than left blank.
+  expect(html).not.toContain('Red ring:')
+  expect(html).toContain('Exclusion radius not stated')
 })

@@ -13,6 +13,9 @@ const TARGETS: Array<{ name: string; url: string }> = [
     url: 'https://magma.esdm.go.id/v1/gunung-api/informasi-letusan/KRA',
   },
   { name: 'gvp-weekly.xml', url: 'https://volcano.si.edu/news/WeeklyVolcanoRSS.xml' },
+  // Every international SIGMET, not just the volcanic-ash ones, so the
+  // parser's own filtering is exercised against real noise.
+  { name: 'isigmet.json', url: 'https://aviationweather.gov/api/data/isigmet?format=json' },
 ]
 
 async function get(url: string): Promise<string> {
