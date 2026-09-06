@@ -1,6 +1,7 @@
 import { setRequestLocale } from 'next-intl/server'
 import { Suspense } from 'react'
-import { StatusSkeleton } from '@/components/skeletons'
+import { ActivityTimeline } from '@/components/activity-timeline'
+import { StatusSkeleton, TimelineSkeleton } from '@/components/skeletons'
 import { StatusCard } from '@/components/status-card'
 import type { Locale } from '@/lib/format'
 
@@ -13,6 +14,11 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       <section className="sm:col-span-2 lg:col-span-12">
         <Suspense fallback={<StatusSkeleton />}>
           <StatusCard locale={locale as Locale} />
+        </Suspense>
+      </section>
+      <section className="sm:col-span-2 lg:col-span-7">
+        <Suspense fallback={<TimelineSkeleton />}>
+          <ActivityTimeline locale={locale as Locale} />
         </Suspense>
       </section>
     </main>
