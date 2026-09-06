@@ -1,9 +1,8 @@
 import { parse } from 'node-html-parser'
 import { cache } from 'react'
+import { VONA_URL } from '@/lib/urls'
 import { fetchText } from './http'
 import { fail, ok, type Result } from './types'
-
-export const VONA_URL = 'https://magma.esdm.go.id/v1/vona?code=KRA'
 
 export type AviationColour = 'green' | 'yellow' | 'orange' | 'red' | 'unknown'
 

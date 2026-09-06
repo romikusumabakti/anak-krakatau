@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl'
-import { ACTIVITY_URL } from '@/lib/sources/status'
+import { ACTIVITY_URL } from '@/lib/urls'
 
 export function DisclaimerBanner() {
   const t = useTranslations('disclaimer')

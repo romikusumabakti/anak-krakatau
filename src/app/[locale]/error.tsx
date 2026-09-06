@@ -1,11 +1,11 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-
-// Hardcoded rather than imported from '@/lib/sources/status': that module
-// pulls in the HTML parser used for server-side scraping, which has no
-// business in a client error-boundary bundle.
-const ACTIVITY_URL = 'https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas'
+// Imported from '@/lib/urls', not '@/lib/sources/status': that module pulls
+// in the HTML parser used for server-side scraping, which has no business
+// in a client error-boundary bundle. lib/urls.ts holds the bare constants
+// with no dependencies, so one definition serves both sides.
+import { ACTIVITY_URL } from '@/lib/urls'
 
 export default function RouteError({ reset }: { error: Error; reset: () => void }) {
   const t = useTranslations('error')

@@ -1,10 +1,9 @@
 import { parse } from 'node-html-parser'
 import { cache } from 'react'
+import { ACTIVITY_URL } from '@/lib/urls'
 import { fetchText } from './http'
 import { fail, ok, type Result } from './types'
 import { MONTHS_ID, wibToDate } from './wib'
-
-export const ACTIVITY_URL = 'https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas'
 
 export type LevelLabel = 'Normal' | 'Waspada' | 'Siaga' | 'Awas'
 
