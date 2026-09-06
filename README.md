@@ -122,3 +122,23 @@ latency often exceeds the 20s timeout — a freshly deployed page can ship
 showing "Source unavailable". This is not a failure state to fix: the first
 ISR revalidation runs in `sin1` and the page heals itself within a minute.
 Observed on the first production deploy and confirmed to recover.
+
+### Ash areas come from SIGMETs, not from VONA
+
+The map draws the ash-affected area from volcanic-ash SIGMETs
+(`aviationweather.gov/api/data/isigmet`, a public NOAA/NWS feed, no key).
+Each carries the area as coordinates issued by the responsible meteorological
+watch office — for the Sunda Strait that is BMKG's Jakarta office, so this is
+an Indonesian authority rather than a foreign estimate.
+
+This replaced a wedge the map used to infer from VONA's prose movement phrase.
+Two things made the change worth making. A SIGMET states the area rather than
+implying it, so the shape earns a hard edge. And VONA notices go quiet for days
+while SIGMETs keep being issued: relying on VONA alone let the page state that
+no ash cloud was observed while an active BMKG SIGMET said the opposite, which
+is the worst thing this dashboard can do.
+
+Two properties the UI must keep. A SIGMET describes **airspace**, not ashfall
+on the ground, and says so on the card. And SIGMETs expire after a few hours;
+expired ones are dropped rather than dimmed, because a polygon with no issuing
+authority behind it is the same lie as a stale timestamp.

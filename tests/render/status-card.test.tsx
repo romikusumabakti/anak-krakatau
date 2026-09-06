@@ -6,6 +6,7 @@ import {
   render,
   restoreFetch,
   setLocale,
+  sigmetDocument,
   stubFetch,
   vonaDocument,
 } from './harness'
@@ -134,4 +135,32 @@ test('the success-path source link is the stable page, not the signed report', a
   expect(html).toContain('Level III')
   expect(html).toContain(`href="${ACTIVITY_URL}"`)
   expect(html).not.toContain('gunung-api/laporan/')
+})
+
+test('does not state "ash cloud not observed" alone while a SIGMET says otherwise', async () => {
+  // VONA can go quiet for days while ash SIGMETs keep being issued. Reading
+  // only VONA, this card flatly reported no observed ash cloud while BMKG's
+  // own watch office had an active SIGMET saying the opposite -- the worst
+  // thing a hazard card can do is understate a live one.
+  stubFetch({
+    activity: ok(FIXTURES.activity),
+    report: ok(FIXTURES.report),
+    vona: ok(vonaDocument('Eruption at 0200 UTC. Ash-cloud is not observed.')),
+    sigmet: ok(sigmetDocument()),
+  })
+  const html = await statusCard()
+  expect(html).toContain('Ash cloud not observed')
+  expect(html).toContain('An ash SIGMET is in force')
+})
+
+test('says nothing about airspace ash when no SIGMET is in force', async () => {
+  stubFetch({
+    activity: ok(FIXTURES.activity),
+    report: ok(FIXTURES.report),
+    vona: ok(vonaDocument('Eruption at 0200 UTC. Ash-cloud is not observed.')),
+    sigmet: ok('[]'),
+  })
+  const html = await statusCard()
+  expect(html).toContain('Ash cloud not observed')
+  expect(html).not.toContain('An ash SIGMET is in force')
 })

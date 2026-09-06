@@ -47,7 +47,12 @@ const LABELS: LevelLabel[] = ['Normal', 'Waspada', 'Siaga', 'Awas']
  * instruction). Using them as a fallback when a report's text omits the
  * field is a defensible identity, not an invented instruction.
  */
-const ANAK_KRAKATAU_SUMMIT = {
+/**
+ * Exported because the ash map needs a centre even when MAGMA is down. The
+ * volcano's position is a fixed physical fact about an island, unlike
+ * hazardRadiusKm, which is a live safety instruction and is never defaulted.
+ */
+export const ANAK_KRAKATAU_SUMMIT = {
   latitude: -6.1009,
   longitude: 105.4233,
   elevationM: 157,

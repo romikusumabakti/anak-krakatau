@@ -46,6 +46,7 @@ export function setLocale(locale: TestLocale) {
 }
 
 export const FIXTURES = {
+  sigmet: await Bun.file('tests/fixtures/isigmet.json').text(),
   activity: await Bun.file('tests/fixtures/tingkat-aktivitas.html').text(),
   report: await Bun.file('tests/fixtures/laporan.html').text(),
   vona: await Bun.file('tests/fixtures/vona-kra.html').text(),
@@ -66,8 +67,49 @@ export function vonaDocument(summary: string, colour = 'Red'): string {
     </div>`
 }
 
+/**
+ * One volcanic-ash SIGMET, valid from an hour ago until an hour from now.
+ *
+ * The committed fixture's validity windows closed in September 2026, and the
+ * adapter drops expired SIGMETs on purpose, so a render test that wants a
+ * drawn polygon has to supply one that is currently in force.
+ */
+export function sigmetDocument(
+  overrides: Partial<{
+    firName: string
+    top: number
+    dir: string
+    spd: string
+    rawSigmet: string
+  }> = {},
+): string {
+  const now = Math.floor(Date.now() / 1000)
+  return JSON.stringify([
+    {
+      hazard: 'VA',
+      qualifier: 'KRAKATAU',
+      firName: overrides.firName ?? 'WIIF JAKARTA',
+      validTimeFrom: now - 3600,
+      validTimeTo: now + 3600,
+      base: 0,
+      top: overrides.top ?? 15000,
+      dir: overrides.dir ?? 'SE',
+      spd: overrides.spd ?? '05',
+      rawSigmet: overrides.rawSigmet ?? 'WIIF JAKARTA FIR VA ERUPTION MT KRAKATAU INTSF=',
+      coords: [
+        { lon: 105.05, lat: -3.333 },
+        { lon: 109.45, lat: -6.217 },
+        { lon: 106.317, lat: -11.183 },
+        { lon: 98.383, lat: -5.85 },
+        { lon: 98.017, lat: -3.067 },
+        { lon: 105.05, lat: -3.333 },
+      ],
+    },
+  ])
+}
+
 type Route = { body: string; status?: number; date?: Date }
-type RouteKey = 'activity' | 'report' | 'vona' | 'eruptions'
+type RouteKey = 'activity' | 'report' | 'vona' | 'eruptions' | 'sigmet'
 
 const realFetch = globalThis.fetch
 
@@ -82,7 +124,9 @@ export function stubFetch(routes: Partial<Record<RouteKey, Route | null>>) {
         ? 'vona'
         : url.includes('informasi-letusan')
           ? 'eruptions'
-          : 'report'
+          : url.includes('aviationweather')
+            ? 'sigmet'
+            : 'report'
     const route = routes[key]
     if (!route) return new Response('unavailable', { status: 503 })
     return new Response(route.body, {

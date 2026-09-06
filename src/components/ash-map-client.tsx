@@ -3,22 +3,22 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 // maplibre-gl 6.x ships no default export (the brief's `import maplibregl
 // from 'maplibre-gl'` doesn't compile) -- only named exports.
-import { Map as MaplibreMap, Marker as MaplibreMarker, setWorkerUrl } from 'maplibre-gl'
+import {
+  LngLatBounds,
+  Map as MaplibreMap,
+  Marker as MaplibreMarker,
+  setWorkerUrl,
+} from 'maplibre-gl'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { useEffect, useRef, useState } from 'react'
-import { circlePolygon, sectorPolygon } from '@/lib/geo'
+import { circlePolygon } from '@/lib/geo'
 import { VONA_URL } from '@/lib/urls'
 
 const STYLES = {
   light: 'https://tiles.openfreemap.org/styles/positron',
   dark: 'https://tiles.openfreemap.org/styles/fiord',
 } as const
-
-/** Indicative sector radius in km. Not tied to any measured ash extent --
- * it exists only to make the drawn direction visible on the map, per the
- * honesty requirement that this is a direction, not a boundary. */
-const SECTOR_RADIUS_KM = 120
 
 /**
  * How long to wait for MapLibre's `load` event before declaring the map dead.
@@ -64,12 +64,20 @@ export type AshMapClientProps = {
    * drawn at all, rather than guessing one.
    */
   hazardRadiusKm: number | null
-  /** Null when there is no direction to draw (VONA unreadable, or the
-   * latest notice reports no observed ash cloud / no movement phrase). */
-  bearing: number | null
+  /**
+   * Ash areas taken verbatim from active volcanic-ash SIGMETs, as
+   * [longitude, latitude] rings.
+   *
+   * These replace the wedge this map used to infer from a VONA movement
+   * phrase. A SIGMET states the affected area as coordinates issued by a
+   * meteorological watch office, so there is nothing left to guess -- and a
+   * shape drawn from measurements is the only kind that earns a hard edge on
+   * a hazard map.
+   */
+  ashAreas: Array<Array<[number, number]>>
 }
 
-export function AshMapClient({ longitude, latitude, hazardRadiusKm, bearing }: AshMapClientProps) {
+export function AshMapClient({ longitude, latitude, hazardRadiusKm, ashAreas }: AshMapClientProps) {
   const container = useRef<HTMLDivElement>(null)
   const { resolvedTheme } = useTheme()
   const [unavailable, setUnavailable] = useState(false)
@@ -146,25 +154,29 @@ export function AshMapClient({ longitude, latitude, hazardRadiusKm, bearing }: A
     map.on('load', () => {
       loaded = true
       clearTimeout(deadline)
-      if (bearing !== null) {
-        map.addSource('sector', {
+      ashAreas.forEach((ring, index) => {
+        const id = `ash-${index}`
+        map.addSource(id, {
           type: 'geojson',
           data: {
             type: 'Feature',
             properties: {},
-            geometry: {
-              type: 'Polygon',
-              coordinates: sectorPolygon(longitude, latitude, bearing, SECTOR_RADIUS_KM),
-            },
+            geometry: { type: 'Polygon', coordinates: [ring] },
           },
         })
         map.addLayer({
-          id: 'sector',
+          id: `${id}-fill`,
           type: 'fill',
-          source: 'sector',
-          paint: { 'fill-color': '#d97706', 'fill-opacity': 0.25 },
+          source: id,
+          paint: { 'fill-color': '#d97706', 'fill-opacity': 0.18 },
         })
-      }
+        map.addLayer({
+          id: `${id}-line`,
+          type: 'line',
+          source: id,
+          paint: { 'line-color': '#b45309', 'line-width': 1.5 },
+        })
+      })
 
       if (hazardRadiusKm !== null) {
         map.addSource('hazard', {
@@ -187,10 +199,22 @@ export function AshMapClient({ longitude, latitude, hazardRadiusKm, bearing }: A
       }
 
       new MaplibreMarker({ color: '#dc2626' }).setLngLat([longitude, latitude]).addTo(map)
+
+      // A SIGMET area runs to roughly a thousand kilometres across, so at the
+      // default zoom the viewport sits INSIDE it and the fill reads as a
+      // colour cast over the whole map rather than a bounded area. Framing to
+      // the areas is what makes them legible as a shape; without ash to show,
+      // the closer view of the strait is the more useful one, so this only
+      // fires when there is something to frame.
+      if (ashAreas.length > 0) {
+        const bounds = new LngLatBounds([longitude, latitude], [longitude, latitude])
+        for (const ring of ashAreas) for (const point of ring) bounds.extend(point)
+        map.fitBounds(bounds, { padding: 24, animate: false, maxZoom: 7 })
+      }
     })
 
     return dispose
-  }, [longitude, latitude, hazardRadiusKm, bearing, resolvedTheme])
+  }, [longitude, latitude, hazardRadiusKm, ashAreas, resolvedTheme])
 
   if (unavailable) {
     // Distinct key so React mounts a fresh node instead of reconciling onto

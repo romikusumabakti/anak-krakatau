@@ -26,7 +26,8 @@
       "2": "Advisory",
       "3": "Alert",
       "4": "Warning"
-    }
+    },
+    "ashAirspaceActive": "An ash SIGMET is in force for the airspace — see the ash direction map."
   },
   "timeline": {
     "heading": "Recent activity",
@@ -57,13 +58,19 @@
   },
   "map": {
     "heading": "Ash direction",
-    "sectorCaption": "Indicative direction only, drawn from the VONA movement phrase — not an authoritative ash cloud boundary.",
     "noSector": "The latest notice reports no observed ash cloud, so no direction is drawn.",
     "directionUnreadable": "We could not read a drift direction from the latest notice, so none is drawn. This does not mean no ash cloud was reported.",
     "legendHeading": "Legend",
-    "legendSector": "Amber wedge: indicative drift direction, read from the VONA movement phrase — not a measured ash boundary.",
     "legendHazard": "Red ring: the official exclusion radius stated in the PVMBG report.",
-    "renderUnavailable": "The map could not be drawn on this device. That says nothing about the volcano — the drift direction is described below and in the original notice."
+    "renderUnavailable": "The map could not be drawn on this device. That says nothing about the volcano — the drift direction is described below and in the original notice.",
+    "legendSigmet": "Shaded area: airspace carrying volcanic ash, as stated in the official SIGMET. Not a forecast of ashfall on the ground.",
+    "sigmetHeading": "Ash in the airspace",
+    "sigmetDetail": "{fir} · {base} to {top} · valid until {until}",
+    "sigmetMoving": "moving {movement}",
+    "sigmetIntensifying": "intensifying",
+    "sigmetNone": "No volcanic-ash SIGMET is in force for Anak Krakatau right now.",
+    "sigmetGroundCaveat": "A SIGMET describes airspace, not ashfall where you are standing.",
+    "surface": "surface"
   },
   "source": {
     "label": "Source",

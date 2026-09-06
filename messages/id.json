@@ -26,7 +26,8 @@
       "2": "Waspada",
       "3": "Siaga",
       "4": "Awas"
-    }
+    },
+    "ashAirspaceActive": "SIGMET abu sedang berlaku untuk wilayah udara — lihat peta arah sebaran abu."
   },
   "timeline": {
     "heading": "Aktivitas terkini",
@@ -57,13 +58,19 @@
   },
   "map": {
     "heading": "Arah sebaran abu",
-    "sectorCaption": "Hanya indikasi arah, digambar dari frasa gerak pada VONA — bukan batas awan abu yang otoritatif.",
     "noSector": "Notice terbaru menyatakan kolom abu tidak teramati, sehingga arah tidak digambar.",
     "directionUnreadable": "Kami tidak dapat membaca arah sebaran dari notice terbaru, sehingga arah tidak digambar. Ini bukan berarti kolom abu tidak dilaporkan.",
     "legendHeading": "Keterangan",
-    "legendSector": "Area oranye: indikasi arah sebaran abu dari frasa gerak pada VONA — bukan batas awan abu yang terukur.",
     "legendHazard": "Lingkaran merah: radius bahaya resmi yang disebutkan dalam laporan PVMBG.",
-    "renderUnavailable": "Peta tidak dapat digambar di perangkat ini. Ini tidak berkaitan dengan kondisi gunung — arah sebaran tetap dijelaskan di bawah dan di notice aslinya."
+    "renderUnavailable": "Peta tidak dapat digambar di perangkat ini. Ini tidak berkaitan dengan kondisi gunung — arah sebaran tetap dijelaskan di bawah dan di notice aslinya.",
+    "legendSigmet": "Area berarsir: wilayah udara yang memuat abu vulkanik, sesuai SIGMET resmi. Bukan prakiraan hujan abu di permukaan.",
+    "sigmetHeading": "Abu di wilayah udara",
+    "sigmetDetail": "{fir} · {base} hingga {top} · berlaku sampai {until}",
+    "sigmetMoving": "bergerak {movement}",
+    "sigmetIntensifying": "menguat",
+    "sigmetNone": "Tidak ada SIGMET abu vulkanik yang berlaku untuk Anak Krakatau saat ini.",
+    "sigmetGroundCaveat": "SIGMET menggambarkan wilayah udara, bukan hujan abu di tempat Anda berada.",
+    "surface": "permukaan"
   },
   "source": {
     "label": "Sumber",

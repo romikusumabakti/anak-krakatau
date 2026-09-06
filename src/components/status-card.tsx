@@ -10,13 +10,18 @@ import {
   formatWibRange,
   type Locale,
 } from '@/lib/format'
+import { getAshSigmets } from '@/lib/sources/sigmet'
 import { getStatus } from '@/lib/sources/status'
 import { ashCloudNotObserved, getVonaNotices } from '@/lib/sources/vona'
 import { COLOUR_STYLES, LEVEL_NUMERALS, LEVEL_STYLES } from '@/lib/status-presentation'
 import { ACTIVITY_URL, VONA_URL } from '@/lib/urls'
 
 export async function StatusCard({ locale }: { locale: Locale }) {
-  const [status, vona] = await Promise.all([getStatus(), getVonaNotices()])
+  const [status, vona, sigmets] = await Promise.all([
+    getStatus(),
+    getVonaNotices(),
+    getAshSigmets(),
+  ])
   const t = await getTranslations('status')
   const tSource = await getTranslations('source')
 
@@ -51,6 +56,15 @@ export async function StatusCard({ locale }: { locale: Locale }) {
   // A null ash height means HEIGHT_RE didn't match, which is a fact about
   // our regex, not about the sky.
   const notObserved = latest ? ashCloudNotObserved(latest) : false
+  /**
+   * VONA notices can go quiet for days while ash SIGMETs keep being issued.
+   * When that happens the newest VONA still reads "ash-cloud is not
+   * observed", and this card was stating it flatly while an active SIGMET
+   * from the same country's meteorological watch office said the opposite.
+   * Understating a live hazard is the worst thing this card can do, so the
+   * contradiction is surfaced rather than resolved in VONA's favour.
+   */
+  const airspaceAshActive = sigmets.ok && sigmets.data.length > 0
 
   return (
     <Card>
@@ -131,7 +145,12 @@ export async function StatusCard({ locale }: { locale: Locale }) {
                     : null}
                 </p>
               ) : notObserved ? (
-                <p className="text-muted-foreground">{t('notObserved')}</p>
+                <>
+                  <p className="text-muted-foreground">{t('notObserved')}</p>
+                  {airspaceAshActive ? (
+                    <p className="text-muted-foreground">{t('ashAirspaceActive')}</p>
+                  ) : null}
+                </>
               ) : (
                 <p className="text-muted-foreground">
                   {t('ashHeightUnreadable')}{' '}
