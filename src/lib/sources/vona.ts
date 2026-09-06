@@ -25,6 +25,13 @@ const HEIGHT_RE =
   /around\s+(\d+)\s*FT\s*\((\d+)\s*M\)\s*above sea level(?:\s*or\s*(\d+)\s*FT\s*\((\d+)\s*M\)\s*above summit)?/i
 const MOVEMENT_RE = /Ash cloud moving (?:from |to )?([^.]+)\./i
 const CODE_RE = /(\d{8}\/\d{4}Z)/
+/**
+ * The ICAO phrase PVMBG uses to state, positively, that no ash cloud was
+ * seen. This is the ONLY evidence for a hazard-negative. A null height or
+ * a null bearing means "our regex did not match", which is a statement
+ * about this codebase, not about the sky -- see `ashCloudNotObserved`.
+ */
+const NOT_OBSERVED_RE = /ash[- ]cloud is not observed/i
 
 const toColour = (raw: string): AviationColour => {
   const lower = raw.trim().toLowerCase()
@@ -38,6 +45,18 @@ const parseUtc = (raw: string): Date | null => {
   const [, y, mo, d, h, mi, s] = match
   const date = new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}Z`)
   return Number.isNaN(date.getTime()) ? null : date
+}
+
+/**
+ * True only when the notice text itself says the ash cloud was not
+ * observed. Never infer this from an unparsed height or bearing: HEIGHT_RE,
+ * MOVEMENT_RE and `bearingFromPhrase` all return null on any wording they
+ * don't recognise, and "we couldn't read it" is not "there was nothing
+ * there". Reporting the second when only the first is true is a false
+ * hazard-negative on a live eruption.
+ */
+export function ashCloudNotObserved(notice: VonaNotice): boolean {
+  return NOT_OBSERVED_RE.test(notice.summary)
 }
 
 export function parseVona(html: string): VonaNotice[] {
@@ -80,5 +99,8 @@ export const getVonaNotices = cache(async (): Promise<Result<VonaNotice[]>> => {
   if (!html.ok) return html
   const notices = parseVona(html.data)
   if (notices.length === 0) return fail('parse', VONA_URL)
-  return ok(notices, VONA_URL)
+  // Third argument: the upstream `Date` header carried by `fetchText`.
+  // Dropping it makes `ok()` stamp `new Date()` -- render time -- so every
+  // card would read "updated now" no matter how old the response was.
+  return ok(notices, VONA_URL, html.fetchedAt)
 })

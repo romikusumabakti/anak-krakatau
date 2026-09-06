@@ -27,6 +27,32 @@ export function formatWib(locale: Locale, date: Date): string {
   return `${formatted} WIB`
 }
 
+/**
+ * A MAGMA report covers a six-hour shift ("periode 00:00-06:00 WIB"), not
+ * an instant, so it is rendered as a range. Both ends are formatted in
+ * Asia/Jakarta like every other time on the page. When the window crosses
+ * WIB midnight the date is repeated on both ends rather than silently
+ * attributing both times to one day.
+ */
+export function formatWibRange(locale: Locale, start: Date, end: Date): string {
+  const day = new Intl.DateTimeFormat(locale, {
+    timeZone: TIME_ZONE,
+    day: 'numeric',
+    month: 'short',
+  })
+  const clock = new Intl.DateTimeFormat(locale, {
+    timeZone: TIME_ZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  const startDay = day.format(start)
+  const endDay = day.format(end)
+  return startDay === endDay
+    ? `${startDay}, ${clock.format(start)}\u2013${clock.format(end)} WIB`
+    : `${startDay} ${clock.format(start)} \u2013 ${endDay} ${clock.format(end)} WIB`
+}
+
 export function formatRelative(locale: Locale, from: Date, now: Date = new Date()): string {
   const seconds = Math.round((from.getTime() - now.getTime()) / 1000)
   const formatter = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })

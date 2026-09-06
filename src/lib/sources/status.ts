@@ -7,6 +7,14 @@ import { MONTHS_ID, wibToDate } from './wib'
 
 export type LevelLabel = 'Normal' | 'Waspada' | 'Siaga' | 'Awas'
 
+/**
+ * The window a MAGMA report covers. PVMBG never states an observation
+ * *instant*: every report is headed "periode 00:00-06:00 WIB", a six-hour
+ * shift. Collapsing that to a single Date would present a range as a
+ * moment, so the range is carried whole and rendered as a range.
+ */
+export type ObservationPeriod = { start: Date; end: Date }
+
 export type VolcanoStatus = {
   level: 1 | 2 | 3 | 4
   levelLabel: LevelLabel
@@ -20,7 +28,13 @@ export type VolcanoStatus = {
   latitude: number
   longitude: number
   elevationM: number
-  observedAt: Date
+  /**
+   * Null when the report's "periode HH:MM-HH:MM WIB" heading can't be read.
+   * Never `new Date()`: an unknown observation window silently becoming
+   * "right now" would present an alert level of unknown age as live, which
+   * is the same class of mistake `hazardRadiusKm` already refuses.
+   */
+  observationPeriod: ObservationPeriod | null
   reportUrl: string
 }
 
@@ -39,6 +53,8 @@ const ANAK_KRAKATAU_SUMMIT = {
   elevationM: 157,
 } as const
 
+const DAY_MS = 86_400_000
+
 export function findReportUrl(activityHtml: string): string | null {
   if (!activityHtml.trim()) return null
   const root = parse(activityHtml)
@@ -48,6 +64,27 @@ export function findReportUrl(activityHtml: string): string | null {
     if (href?.includes('/gunung-api/laporan/')) return href
   }
   return null
+}
+
+function parseObservationPeriod(text: string): ObservationPeriod | null {
+  const period = text.match(
+    /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}),\s*periode\s*(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})\s*WIB/,
+  )
+  if (!period?.[2]) return null
+  const monthIndex = MONTHS_ID.indexOf(period[2].toLowerCase())
+  if (monthIndex < 0) return null
+
+  const year = Number(period[3])
+  const day = Number(period[1])
+  const start = wibToDate(year, monthIndex, day, Number(period[4]), Number(period[5]))
+  let end = wibToDate(year, monthIndex, day, Number(period[6]), Number(period[7]))
+  // MAGMA writes the last shift of the day as "18:00-24:00", which
+  // wibToDate already rolls into the next day. A report written
+  // "18:00-00:00" would not, and would land the end of the window before
+  // its start; treat that as the following midnight rather than emitting
+  // a backwards range.
+  if (end.getTime() <= start.getTime()) end = new Date(end.getTime() + DAY_MS)
+  return { start, end }
 }
 
 export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'> | null {
@@ -71,21 +108,6 @@ export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'
   const lat = text.match(/Latitude\s*(-?[\d.]+)\s*°/)
   const lon = text.match(/Longitude\s*(-?[\d.]+)\s*°/)
   const elevation = text.match(/ketinggian\s+([\d.]+)\s*mdpl/i)
-  const period = text.match(
-    /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4}),\s*periode\s*(\d{2}):(\d{2})-(\d{2}):(\d{2})\s*WIB/,
-  )
-
-  const monthIndex = period?.[2] ? MONTHS_ID.indexOf(period[2].toLowerCase()) : -1
-  const observedAt =
-    period && monthIndex >= 0
-      ? wibToDate(
-          Number(period[3]),
-          monthIndex,
-          Number(period[1]),
-          Number(period[6]),
-          Number(period[7]),
-        )
-      : new Date()
 
   return {
     level: numeric,
@@ -94,7 +116,7 @@ export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'
     latitude: lat?.[1] ? Number(lat[1]) : ANAK_KRAKATAU_SUMMIT.latitude,
     longitude: lon?.[1] ? Number(lon[1]) : ANAK_KRAKATAU_SUMMIT.longitude,
     elevationM: elevation?.[1] ? Number(elevation[1]) : ANAK_KRAKATAU_SUMMIT.elevationM,
-    observedAt,
+    observationPeriod: parseObservationPeriod(text),
   }
 }
 
@@ -107,6 +129,14 @@ export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'
  * defeats Next.js's own fetch-level request memoization (which compares
  * the full options object), so without this wrapper each render doubles
  * the upstream hit.
+ *
+ * Every failure carries ACTIVITY_URL, never the signed report URL. The UI
+ * renders `sourceUrl` as "open the original report"; handing a reader the
+ * signed URL that just failed -- or one whose signature has expired, which
+ * returns 403 -- would reproduce the failure for them.
+ *
+ * On success, `fetchedAt` is the report fetch's upstream `Date` header:
+ * that is the response the displayed level and radius were read out of.
  */
 export const getStatus = cache(async (): Promise<Result<VolcanoStatus>> => {
   const activity = await fetchText(ACTIVITY_URL)
@@ -116,10 +146,10 @@ export const getStatus = cache(async (): Promise<Result<VolcanoStatus>> => {
   if (!reportUrl) return fail('parse', ACTIVITY_URL)
 
   const report = await fetchText(reportUrl)
-  if (!report.ok) return report
+  if (!report.ok) return fail(report.reason, ACTIVITY_URL)
 
   const status = parseReport(report.data)
-  if (!status) return fail('parse', reportUrl)
+  if (!status) return fail('parse', ACTIVITY_URL)
 
-  return ok({ ...status, reportUrl }, reportUrl)
+  return ok({ ...status, reportUrl }, reportUrl, report.fetchedAt)
 })

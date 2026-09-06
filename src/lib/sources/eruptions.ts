@@ -1,4 +1,5 @@
 import { parse } from 'node-html-parser'
+import { cache } from 'react'
 import { ERUPTIONS_URL } from '@/lib/urls'
 import { fetchText } from './http'
 import { fail, ok, type Result } from './types'
@@ -55,10 +56,21 @@ export function parseEruptions(html: string): EruptionEvent[] {
   return events.sort((a, b) => b.occurredAt.getTime() - a.occurredAt.getTime())
 }
 
-export async function getEruptions(): Promise<Result<EruptionEvent[]>> {
+/**
+ * Wrapped in React's `cache()` for the same reason as `getStatus` and
+ * `getVonaNotices`: `fetchText` passes a fresh `AbortSignal.timeout(...)`
+ * on every call, and a distinct signal instance defeats Next.js's own
+ * fetch-level request memoization, so a second call site sharing a render
+ * would double the upstream hit to a government server. One call site
+ * today; the invariant is what's being protected, not the current count.
+ *
+ * `html.fetchedAt` is threaded into `ok()` so the card reports the age of
+ * the upstream response rather than the moment it happened to render.
+ */
+export const getEruptions = cache(async (): Promise<Result<EruptionEvent[]>> => {
   const html = await fetchText(ERUPTIONS_URL)
   if (!html.ok) return html
   const events = parseEruptions(html.data)
   if (events.length === 0) return fail('parse', ERUPTIONS_URL)
-  return ok(events, ERUPTIONS_URL)
-}
+  return ok(events, ERUPTIONS_URL, html.fetchedAt)
+})
