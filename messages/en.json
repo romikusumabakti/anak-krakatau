@@ -11,17 +11,26 @@
     "heading": "Current status",
     "hazardRadius": "Stay {km} km from the active crater",
     "hazardRadiusUnknown": "Exclusion radius not stated in the latest report.",
+    "observationPeriod": "Observation period {range}",
+    "observationPeriodUnknown": "Observation period not stated in the latest report.",
     "aviationColour": "Aviation colour code",
     "aviationColourUnknown": "Unrecognised",
     "ashTop": "Ash cloud top",
     "aboveSummit": "above summit",
     "notObserved": "Ash cloud not observed",
-    "levels": { "1": "Normal", "2": "Advisory", "3": "Alert", "4": "Warning" }
+    "ashHeightUnreadable": "We could not read the ash-cloud height from the latest notice. This does not mean no ash cloud was reported.",
+    "unavailable": "Status unavailable",
+    "unavailableLink": "Status unavailable — open MAGMA Indonesia",
+    "levels": {
+      "1": "Normal",
+      "2": "Advisory",
+      "3": "Alert",
+      "4": "Warning"
+    }
   },
   "timeline": {
     "heading": "Recent activity",
-    "ongoing": "Still ongoing",
-    "empty": "No recent events."
+    "ongoing": "Ongoing at time of report"
   },
   "preparedness": {
     "heading": "If ash falls near you",
@@ -49,16 +58,31 @@
   "map": {
     "heading": "Ash direction",
     "sectorCaption": "Indicative direction only, drawn from the VONA movement phrase — not an authoritative ash cloud boundary.",
-    "noSector": "The latest notice reports no observed ash cloud, so no direction is drawn."
+    "noSector": "The latest notice reports no observed ash cloud, so no direction is drawn.",
+    "directionUnreadable": "We could not read a drift direction from the latest notice, so none is drawn. This does not mean no ash cloud was reported.",
+    "legendHeading": "Legend",
+    "legendSector": "Amber wedge: indicative drift direction, read from the VONA movement phrase — not a measured ash boundary.",
+    "legendHazard": "Red ring: the official exclusion radius stated in the PVMBG report."
   },
   "source": {
     "label": "Source",
     "updated": "updated {time}",
+    "issued": "issued {time}",
     "unavailable": "Source unavailable",
-    "openOriginal": "Open the original report"
+    "openOriginal": "Open the original report",
+    "openNotice": "Open the VONA notice"
   },
-  "theme": { "label": "Theme", "system": "System", "light": "Light", "dark": "Dark" },
-  "locale": { "label": "Language", "en": "English", "id": "Bahasa Indonesia" },
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "locale": {
+    "label": "Language",
+    "en": "English",
+    "id": "Bahasa Indonesia"
+  },
   "error": {
     "heading": "Something went wrong",
     "body": "Official information stays available at",

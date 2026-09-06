@@ -21,10 +21,17 @@ export async function ActivityTimeline({ locale }: { locale: Locale }) {
         <CardTitle>{t('heading')}</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* `entries` is empty only when BOTH feeds failed: getEruptions and
+            getVonaNotices each return `fail('parse', ...)` rather than an
+            empty success, so `eruptions.ok` here always implies at least
+            one entry. The old `eruptions.ok ? t('empty') : ...` arm was
+            unreachable, and it encoded a belief that a successful fetch can
+            mean "no recent events" -- which, if an adapter were ever
+            "fixed" to return empty successes, would print "No recent
+            events." in the middle of an eruption. The per-source footers
+            below carry the failure detail and the links out. */}
         {entries.length === 0 ? (
-          <p className="text-muted-foreground text-sm">
-            {eruptions.ok ? t('empty') : tSource('unavailable')}
-          </p>
+          <p className="text-muted-foreground text-sm">{tSource('unavailable')}</p>
         ) : (
           <ol className="space-y-4">
             {entries.map((entry) => (

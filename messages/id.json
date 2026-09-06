@@ -11,17 +11,26 @@
     "heading": "Status saat ini",
     "hazardRadius": "Jangan mendekat dalam radius {km} km dari kawah aktif",
     "hazardRadiusUnknown": "Radius bahaya tidak disebutkan dalam laporan terbaru.",
+    "observationPeriod": "Periode pengamatan {range}",
+    "observationPeriodUnknown": "Periode pengamatan tidak disebutkan dalam laporan terbaru.",
     "aviationColour": "Kode warna penerbangan",
     "aviationColourUnknown": "Tidak dikenali",
     "ashTop": "Tinggi kolom abu",
     "aboveSummit": "di atas puncak",
     "notObserved": "Kolom abu tidak teramati",
-    "levels": { "1": "Normal", "2": "Waspada", "3": "Siaga", "4": "Awas" }
+    "ashHeightUnreadable": "Kami tidak dapat membaca tinggi kolom abu dari notice terbaru. Ini bukan berarti kolom abu tidak dilaporkan.",
+    "unavailable": "Status tidak tersedia",
+    "unavailableLink": "Status tidak tersedia — buka MAGMA Indonesia",
+    "levels": {
+      "1": "Normal",
+      "2": "Waspada",
+      "3": "Siaga",
+      "4": "Awas"
+    }
   },
   "timeline": {
     "heading": "Aktivitas terkini",
-    "ongoing": "Masih berlangsung",
-    "empty": "Belum ada kejadian terbaru."
+    "ongoing": "Masih berlangsung saat laporan dibuat"
   },
   "preparedness": {
     "heading": "Jika abu turun di sekitar Anda",
@@ -49,16 +58,31 @@
   "map": {
     "heading": "Arah sebaran abu",
     "sectorCaption": "Hanya indikasi arah, digambar dari frasa gerak pada VONA — bukan batas awan abu yang otoritatif.",
-    "noSector": "Notice terbaru menyatakan kolom abu tidak teramati, sehingga arah tidak digambar."
+    "noSector": "Notice terbaru menyatakan kolom abu tidak teramati, sehingga arah tidak digambar.",
+    "directionUnreadable": "Kami tidak dapat membaca arah sebaran dari notice terbaru, sehingga arah tidak digambar. Ini bukan berarti kolom abu tidak dilaporkan.",
+    "legendHeading": "Keterangan",
+    "legendSector": "Area oranye: indikasi arah sebaran abu dari frasa gerak pada VONA — bukan batas awan abu yang terukur.",
+    "legendHazard": "Lingkaran merah: radius bahaya resmi yang disebutkan dalam laporan PVMBG."
   },
   "source": {
     "label": "Sumber",
     "updated": "diperbarui {time}",
+    "issued": "diterbitkan {time}",
     "unavailable": "Sumber tidak tersedia",
-    "openOriginal": "Buka laporan asli"
+    "openOriginal": "Buka laporan asli",
+    "openNotice": "Buka notice VONA"
   },
-  "theme": { "label": "Tema", "system": "Sistem", "light": "Terang", "dark": "Gelap" },
-  "locale": { "label": "Bahasa", "en": "English", "id": "Bahasa Indonesia" },
+  "theme": {
+    "label": "Tema",
+    "system": "Sistem",
+    "light": "Terang",
+    "dark": "Gelap"
+  },
+  "locale": {
+    "label": "Bahasa",
+    "en": "English",
+    "id": "Bahasa Indonesia"
+  },
   "error": {
     "heading": "Terjadi kesalahan",
     "body": "Informasi resmi tetap bisa diakses di",
