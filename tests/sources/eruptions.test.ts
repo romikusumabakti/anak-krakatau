@@ -50,6 +50,35 @@ test('sorts newest first', () => {
   expect([...times].sort((a, b) => b - a)).toEqual(times)
 })
 
+test('re-sorts a document whose timeline items appear oldest-first', () => {
+  // The fixture happens to already be newest-first in document order, so a
+  // test built only from it cannot tell a real sort from a no-op — deleting
+  // the `.sort()` call in parseEruptions would still pass. This document
+  // deliberately puts the older eruption first and the newer one second, and
+  // also pins the WIB-to-UTC day-boundary case: 05 Sep 00:01 WIB is
+  // 2026-09-04T17:01Z, which is *after* (newer than) 04 Sep 23:07 WIB at
+  // 2026-09-04T16:07Z, even though "04 September" reads later in the day
+  // than "05 September" would suggest at a glance.
+  const html = `
+    <div class="timeline-item"><div class="timeline-body">
+      <p class="timeline-text">Terjadi erupsi G. Anak Krakatau pada hari Jumat,
+      04 September 2026, pukul 23:07 WIB. Visual letusan tidak teramati. Erupsi ini
+      terekam di seismograf dengan amplitudo maksimum 30 mm dan durasi 10 detik.</p>
+    </div></div>
+    <div class="timeline-item"><div class="timeline-body">
+      <p class="timeline-text">Terjadi erupsi G. Anak Krakatau pada hari Sabtu,
+      05 September 2026, pukul 00:01 WIB. Visual letusan tidak teramati. Erupsi ini
+      terekam di seismograf dengan amplitudo maksimum 40 mm dan durasi 12 detik.</p>
+    </div></div>`
+  const events = parseEruptions(html)
+  expect(events.map((e) => e.occurredAt.toISOString())).toEqual([
+    '2026-09-04T17:01:00.000Z',
+    '2026-09-04T16:07:00.000Z',
+  ])
+  // Sanity check the events themselves came through, not just their order.
+  expect(events.map((e) => e.seismicAmplitudeMm)).toEqual([40, 30])
+})
+
 test('returns an empty array for an empty document', () => {
   expect(parseEruptions('')).toEqual([])
 })
@@ -58,4 +87,31 @@ test('skips timeline items whose narrative has no parsable date', () => {
   const html =
     '<div class="timeline-item"><div class="timeline-body"><p class="timeline-text">tidak ada tanggal</p></div></div>'
   expect(parseEruptions(html)).toEqual([])
+})
+
+test('parses comma-decimal amplitude and duration as real numbers, not null or truncated', () => {
+  // Indonesian text conventionally uses a comma as the decimal separator.
+  // "[\d.]+" would stop matching at the comma and miss the whole field,
+  // silently producing null (indistinguishable from "not measured").
+  const html = `
+    <div class="timeline-item"><div class="timeline-body">
+      <p class="timeline-text">Terjadi erupsi G. Anak Krakatau pada hari Minggu,
+      06 September 2026, pukul 07:10 WIB. Visual letusan tidak teramati. Erupsi ini
+      terekam di seismograf dengan amplitudo maksimum 12,5 mm dan durasi 16,5 detik.</p>
+    </div></div>`
+  const [event] = parseEruptions(html)
+  expect(event?.seismicAmplitudeMm).toBe(12.5)
+  expect(event?.durationSeconds).toBe(16.5)
+})
+
+test('still parses whole-number amplitude and duration', () => {
+  const html = `
+    <div class="timeline-item"><div class="timeline-body">
+      <p class="timeline-text">Terjadi erupsi G. Anak Krakatau pada hari Minggu,
+      06 September 2026, pukul 07:10 WIB. Visual letusan tidak teramati. Erupsi ini
+      terekam di seismograf dengan amplitudo maksimum 50 mm dan durasi 16 detik.</p>
+    </div></div>`
+  const [event] = parseEruptions(html)
+  expect(event?.seismicAmplitudeMm).toBe(50)
+  expect(event?.durationSeconds).toBe(16)
 })
