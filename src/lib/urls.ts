@@ -14,3 +14,11 @@
 export const ACTIVITY_URL = 'https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas'
 export const VONA_URL = 'https://magma.esdm.go.id/v1/vona?code=KRA'
 export const ERUPTIONS_URL = 'https://magma.esdm.go.id/v1/gunung-api/informasi-letusan/KRA'
+
+/**
+ * BMKG is the agency that issues tsunami warnings for Indonesia. Deliberately
+ * the site root rather than the deeper /gempabumi/berpotensi-tsunami page:
+ * the tsunami section is one prominent click from here, and a rotted deep
+ * link would fail the reader at the exact moment they needed it.
+ */
+export const BMKG_URL = 'https://www.bmkg.go.id/'

@@ -89,5 +89,13 @@
     "body": "Official information stays available at",
     "linkLabel": "MAGMA Indonesia",
     "retry": "Try again"
+  },
+  "coastal": {
+    "heading": "If you are on the coast",
+    "history": "Anak Krakatau's deadliest event was not ashfall. On 22 December 2018 part of its flank collapsed into the sea, and the tsunami killed 437 people along the Banten and Lampung coasts.",
+    "noWarning": "That wave arrived without a felt earthquake. The collapse produced no strong shaking, so the warning systems did not detect it and no alert was issued. Do not wait to feel an earthquake.",
+    "action": "If the sea suddenly draws far back, or you hear a loud boom from the strait, move away from the shore to higher ground immediately and stay there until BMKG says it is safe.",
+    "authority": "This dashboard does not monitor tsunami risk. Tsunami warnings for Indonesia are issued by BMKG — follow BMKG and your local BPBD.",
+    "authorityLink": "Open BMKG"
   }
 }

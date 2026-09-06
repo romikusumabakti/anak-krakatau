@@ -89,5 +89,13 @@
     "body": "Informasi resmi tetap bisa diakses di",
     "linkLabel": "MAGMA Indonesia",
     "retry": "Coba lagi"
+  },
+  "coastal": {
+    "heading": "Jika Anda berada di pesisir",
+    "history": "Peristiwa paling mematikan Anak Krakatau bukan hujan abu. Pada 22 Desember 2018 sebagian tubuhnya longsor ke laut, dan tsunaminya menewaskan 437 orang di pesisir Banten dan Lampung.",
+    "noWarning": "Gelombang itu datang tanpa gempa yang terasa. Longsorannya tidak menimbulkan guncangan kuat, sehingga sistem peringatan tidak mendeteksinya dan tidak ada peringatan yang terbit. Jangan menunggu merasakan gempa.",
+    "action": "Jika air laut tiba-tiba surut jauh, atau terdengar dentuman keras dari arah selat, segera menjauh dari pantai ke tempat yang lebih tinggi dan bertahan di sana sampai BMKG menyatakan aman.",
+    "authority": "Dashboard ini tidak memantau risiko tsunami. Peringatan tsunami di Indonesia diterbitkan BMKG — ikuti BMKG dan BPBD setempat.",
+    "authorityLink": "Buka BMKG"
   }
 }
