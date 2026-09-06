@@ -1,0 +1,62 @@
+{
+  "meta": {
+    "title": "Anak Krakatau — Live Status",
+    "description": "Current alert level, ash advisories, and eruption timeline for Anak Krakatau, Indonesia."
+  },
+  "disclaimer": {
+    "text": "Unofficial. Always follow MAGMA Indonesia, BMKG, and BNPB.",
+    "link": "Open MAGMA Indonesia"
+  },
+  "status": {
+    "heading": "Current status",
+    "hazardRadius": "Stay {km} km from the active crater",
+    "hazardRadiusUnknown": "Exclusion radius not stated in the latest report.",
+    "aviationColour": "Aviation colour code",
+    "aviationColourUnknown": "Unrecognised",
+    "ashTop": "Ash cloud top",
+    "aboveSummit": "above summit",
+    "notObserved": "Ash cloud not observed",
+    "levels": { "1": "Normal", "2": "Advisory", "3": "Alert", "4": "Warning" }
+  },
+  "timeline": {
+    "heading": "Recent activity",
+    "ongoing": "Still ongoing",
+    "empty": "No recent events."
+  },
+  "preparedness": {
+    "heading": "If ash falls near you",
+    "mask": {
+      "title": "Wear a proper mask",
+      "body": "Use an N95 or KN95 mask outdoors. A cloth mask does not stop volcanic ash."
+    },
+    "indoors": {
+      "title": "Close up the house",
+      "body": "Shut windows, doors, and vents. Keep pets inside."
+    },
+    "water": {
+      "title": "Cover water and food",
+      "body": "Cover open water tanks and wash produce before eating."
+    },
+    "driving": {
+      "title": "Drive slowly or not at all",
+      "body": "Ash makes roads slippery and cuts visibility. Do not use wipers on dry ash."
+    },
+    "contact": {
+      "title": "Emergency contacts",
+      "body": "BNPB call centre 117. Local BPBD for evacuation information."
+    }
+  },
+  "map": {
+    "heading": "Ash direction",
+    "sectorCaption": "Indicative direction only, drawn from the VONA movement phrase — not an authoritative ash cloud boundary.",
+    "noSector": "The latest notice reports no observed ash cloud, so no direction is drawn."
+  },
+  "source": {
+    "label": "Source",
+    "updated": "updated {time}",
+    "unavailable": "Source unavailable",
+    "openOriginal": "Open the original report"
+  },
+  "theme": { "label": "Theme", "system": "System", "light": "Light", "dark": "Dark" },
+  "locale": { "label": "Language", "en": "English", "id": "Bahasa Indonesia" }
+}
