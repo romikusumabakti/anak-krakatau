@@ -104,5 +104,9 @@
     "action": "If the sea suddenly draws far back, or you hear a loud boom from the strait, move away from the shore to higher ground immediately and stay there until BMKG says it is safe.",
     "authority": "This dashboard does not monitor tsunami risk. Tsunami warnings for Indonesia are issued by BMKG — follow BMKG and your local BPBD.",
     "authorityLink": "Open BMKG"
+  },
+  "footer": {
+    "copyright": "© 2026 Romi Kusuma Bakti",
+    "repository": "Source code"
   }
 }

@@ -22,3 +22,6 @@ export const ERUPTIONS_URL = 'https://magma.esdm.go.id/v1/gunung-api/informasi-l
  * link would fail the reader at the exact moment they needed it.
  */
 export const BMKG_URL = 'https://www.bmkg.go.id/'
+
+/** This dashboard's own source, so a reader can check how a figure was derived. */
+export const REPOSITORY_URL = 'https://github.com/romikusumabakti/anak-krakatau'
