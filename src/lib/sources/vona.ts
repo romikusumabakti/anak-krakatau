@@ -4,7 +4,7 @@ import { fail, ok, type Result } from './types'
 
 export const VONA_URL = 'https://magma.esdm.go.id/v1/vona?code=KRA'
 
-export type AviationColour = 'green' | 'yellow' | 'orange' | 'red'
+export type AviationColour = 'green' | 'yellow' | 'orange' | 'red' | 'unknown'
 
 export type VonaNotice = {
   issuedAt: Date
@@ -23,12 +23,12 @@ const COLOURS: AviationColour[] = ['green', 'yellow', 'orange', 'red']
 
 const HEIGHT_RE =
   /around\s+(\d+)\s*FT\s*\((\d+)\s*M\)\s*above sea level(?:\s*or\s*(\d+)\s*FT\s*\((\d+)\s*M\)\s*above summit)?/i
-const MOVEMENT_RE = /Ash cloud moving from ([^.]+)\./i
+const MOVEMENT_RE = /Ash cloud moving (?:from |to )?([^.]+)\./i
 const CODE_RE = /(\d{8}\/\d{4}Z)/
 
 const toColour = (raw: string): AviationColour => {
   const lower = raw.trim().toLowerCase()
-  return COLOURS.includes(lower as AviationColour) ? (lower as AviationColour) : 'orange'
+  return COLOURS.includes(lower as AviationColour) ? (lower as AviationColour) : 'unknown'
 }
 
 /** "2026-09-05 02:00:00 UTC" -> Date */
