@@ -22,7 +22,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
       </section>
       <section className="sm:col-span-2 lg:col-span-12">
         <Suspense fallback={<MapSkeleton />}>
-          <AshMap />
+          <AshMap locale={locale as Locale} />
         </Suspense>
       </section>
       <section className="sm:col-span-2 lg:col-span-7">

@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { Badge } from '@/components/ui/badge'
 import { getStatus } from '@/lib/sources/status'
 import { COLOUR_STYLES, LEVEL_NUMERALS, LEVEL_STYLES } from '@/lib/status-presentation'
+import { ACTIVITY_URL } from '@/lib/urls'
 
 /**
  * Compact echo of the status card's alert level, mounted in the sticky
@@ -14,9 +15,12 @@ import { COLOUR_STYLES, LEVEL_NUMERALS, LEVEL_STYLES } from '@/lib/status-presen
  * On fetch failure this still renders a badge -- an empty header slot is
  * an unmarked blank on the one element specifically built to persist
  * through scrolling, which the "never show a blank without a marker"
- * constraint rules out. It reuses the neutral `unknown` style and the
- * existing `status.aviationColourUnknown` copy ("Unrecognised" /
- * "Tidak dikenali") rather than inventing a new catalogue key.
+ * constraint rules out. The failure copy is its own catalogue key: it
+ * previously reused `status.aviationColourUnknown` ("Unrecognised" /
+ * "Tidak dikenali"), which an Indonesian reader parses as a claim about
+ * the volcano's classification rather than about our connection to MAGMA.
+ * The badge is also a link, so the header keeps working as an escape
+ * hatch to the official page exactly when our own data is missing.
  */
 export async function HeaderStatusBadge() {
   const status = await getStatus()
@@ -24,10 +28,18 @@ export async function HeaderStatusBadge() {
 
   if (!status.ok) {
     return (
-      <Badge className={`${COLOUR_STYLES.unknown} shrink-0 gap-1`}>
-        <span aria-hidden="true">?</span>
-        <span>{t('aviationColourUnknown')}</span>
-      </Badge>
+      <a
+        aria-label={t('unavailableLink')}
+        className="shrink-0"
+        href={ACTIVITY_URL}
+        rel="noreferrer"
+        target="_blank"
+      >
+        <Badge className={`${COLOUR_STYLES.unknown} shrink-0 gap-1`}>
+          <span aria-hidden="true">?</span>
+          <span>{t('unavailable')}</span>
+        </Badge>
+      </a>
     )
   }
 
