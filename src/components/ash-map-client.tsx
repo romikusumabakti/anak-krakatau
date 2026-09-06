@@ -3,7 +3,7 @@
 import 'maplibre-gl/dist/maplibre-gl.css'
 // maplibre-gl 6.x ships no default export (the brief's `import maplibregl
 // from 'maplibre-gl'` doesn't compile) -- only named exports.
-import { Map as MaplibreMap, Marker as MaplibreMarker } from 'maplibre-gl'
+import { Map as MaplibreMap, Marker as MaplibreMarker, setWorkerUrl } from 'maplibre-gl'
 import { useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { useEffect, useRef, useState } from 'react'
@@ -40,6 +40,20 @@ const LOAD_TIMEOUT_MS = 15_000
  * looking like an empty map.
  */
 const CONTEXT_RESTORE_GRACE_MS = 5_000
+
+/**
+ * MapLibre finds its tile-parsing worker from `import.meta.url`, and bails to
+ * an empty string when that is not an http(s) URL -- which it never is inside
+ * a bundled chunk. `new Worker("")` then resolves against the document base,
+ * so the worker is handed the page's own HTML, dies immediately, and reports
+ * nothing. The style, TileJSON and sprites still load, so the failure looks
+ * like a blank map rather than an error.
+ *
+ * scripts/sync-maplibre-worker.ts copies the worker into public/ at build
+ * time; this points MapLibre at it. Set once at module scope, before any map
+ * is constructed.
+ */
+setWorkerUrl('/maplibre-gl-worker.mjs')
 
 export type AshMapClientProps = {
   longitude: number
