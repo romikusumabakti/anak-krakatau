@@ -10,7 +10,13 @@ export type LevelLabel = 'Normal' | 'Waspada' | 'Siaga' | 'Awas'
 export type VolcanoStatus = {
   level: 1 | 2 | 3 | 4
   levelLabel: LevelLabel
-  hazardRadiusKm: number
+  /**
+   * A live safety instruction that changes with the volcano's state. Never
+   * defaulted: if the report doesn't state a radius, this is null rather
+   * than a guessed evacuation boundary. Downstream, a null radius means
+   * "omit the line, draw no exclusion circle."
+   */
+  hazardRadiusKm: number | null
   latitude: number
   longitude: number
   elevationM: number
@@ -20,6 +26,18 @@ export type VolcanoStatus = {
 
 const ROMAN: Record<string, 1 | 2 | 3 | 4> = { I: 1, II: 2, III: 3, IV: 4 }
 const LABELS: LevelLabel[] = ['Normal', 'Waspada', 'Siaga', 'Awas']
+
+/**
+ * Anak Krakatau's summit position and elevation are fixed physical facts
+ * about an island that does not move, unlike hazardRadiusKm (a live safety
+ * instruction). Using them as a fallback when a report's text omits the
+ * field is a defensible identity, not an invented instruction.
+ */
+const ANAK_KRAKATAU_SUMMIT = {
+  latitude: -6.1009,
+  longitude: 105.4233,
+  elevationM: 157,
+} as const
 
 export function findReportUrl(activityHtml: string): string | null {
   if (!activityHtml.trim()) return null
@@ -34,7 +52,14 @@ export function findReportUrl(activityHtml: string): string | null {
 
 export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'> | null {
   if (!reportHtml.trim()) return null
-  const text = parse(reportHtml).text.replace(/\s+/g, ' ')
+  const root = parse(reportHtml)
+  // Strip <script>/<style> before flattening to text. node-html-parser's
+  // .text includes script bodies, and MAGMA's report pages embed a Leaflet
+  // icon-switch script listing all four level strings — without this guard
+  // the parser can pick up whichever level string comes first in document
+  // order, not the one the visible badge actually states.
+  for (const node of root.querySelectorAll('script, style')) node.remove()
+  const text = root.text.replace(/\s+/g, ' ')
 
   const level = text.match(/Level\s+(IV|III|II|I)\s*\((Normal|Waspada|Siaga|Awas)\)/)
   if (!level?.[1] || !level[2]) return null
@@ -65,10 +90,10 @@ export function parseReport(reportHtml: string): Omit<VolcanoStatus, 'reportUrl'
   return {
     level: numeric,
     levelLabel: label,
-    hazardRadiusKm: radius?.[1] ? Number(radius[1].replace(',', '.')) : 3,
-    latitude: lat?.[1] ? Number(lat[1]) : -6.1009,
-    longitude: lon?.[1] ? Number(lon[1]) : 105.4233,
-    elevationM: elevation?.[1] ? Number(elevation[1]) : 157,
+    hazardRadiusKm: radius?.[1] ? Number(radius[1].replace(',', '.')) : null,
+    latitude: lat?.[1] ? Number(lat[1]) : ANAK_KRAKATAU_SUMMIT.latitude,
+    longitude: lon?.[1] ? Number(lon[1]) : ANAK_KRAKATAU_SUMMIT.longitude,
+    elevationM: elevation?.[1] ? Number(elevation[1]) : ANAK_KRAKATAU_SUMMIT.elevationM,
     observedAt,
   }
 }
