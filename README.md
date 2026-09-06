@@ -1,36 +1,88 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Anak Krakatau — Live Status Dashboard
 
-## Getting Started
+A public status page for the ongoing Anak Krakatau (Krakatoa) eruption: current
+alert level, ash advisories, recent activity, and preparedness guidance for
+people near the volcano.
 
-First, run the development server:
+**This app is unofficial.** It is not produced by, endorsed by, or affiliated
+with PVMBG, MAGMA Indonesia, BMKG, or BNPB. It republishes public data those
+agencies already publish, reformatted for readability, and links back to the
+originals on every card. For evacuation orders and authoritative guidance,
+always follow MAGMA Indonesia, BMKG, and BNPB directly — this dashboard says
+so on every page.
+
+## Data sources
+
+All data is scraped server-side from MAGMA Indonesia (PVMBG), the Indonesian
+government's official volcano-monitoring platform. Nothing is fetched
+client-side, and nothing is stored beyond the request lifetime.
+
+| Source | URL | Used for |
+| --- | --- | --- |
+| MAGMA activity level list | `https://magma.esdm.go.id/v1/gunung-api/tingkat-aktivitas` | Finds the current signed report for Anak Krakatau |
+| MAGMA signed activity report | linked from the row above, under `/v1/gunung-api/laporan/...` | Alert level (I–IV), hazard radius, summit coordinates, observation time |
+| MAGMA VONA notices | `https://magma.esdm.go.id/v1/vona?code=KRA` | Aviation colour code, ash cloud height, ash movement direction |
+| MAGMA eruption timeline | `https://magma.esdm.go.id/v1/gunung-api/informasi-letusan/KRA` | Recent eruption events shown in the activity timeline |
+
+Two adapters were built and deliberately removed during development:
+
+- **Darwin VAAC** (the ash-advisory source in the original design spec) —
+  probing it showed the advisory endpoints require authentication or return
+  "does not currently exist" for a live target. MAGMA VONA replaced it; see
+  the plan for the investigation.
+- **GVP weekly reports** and **BMKG** — cut as unused once MAGMA alone covered
+  every card. `tests/fixtures/gvp-weekly.xml` stays committed on purpose, as
+  a record of that decision, even though nothing reads it anymore.
+
+### Why fixtures are committed
+
+`tests/fixtures/*.html` are real, saved copies of MAGMA's pages. Tests parse
+these fixtures instead of the network, so the suite is fast and doesn't hit
+government servers on every run — servers that, during this eruption, have
+been intermittently returning `502`.
+
+Run `bun run fixtures:refresh` occasionally to re-download them. A `git diff`
+afterwards is the early-warning signal that a source changed its HTML
+structure: if the parsers still pass against updated fixtures, nothing is
+wrong; if a fixture's shape moved and a test now fails, that's the adapter
+that needs attention before it silently breaks in production.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
+bun run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open `http://localhost:3000` (English) or `http://localhost:3000/id`
+(Indonesian).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Purpose |
+| --- | --- |
+| `bun install` | Install dependencies |
+| `bun run dev` | Start the dev server (Turbopack) |
+| `bun run build` | Production build |
+| `bun run start` | Run the production build |
+| `bun test` | Run the test suite (parses committed fixtures, no network) |
+| `bun run check` | Format + lint, writing fixes |
+| `bun run ci:lint` | Lint in CI mode (no writes) |
+| `bun run typecheck` | Generate route types, then `tsc --noEmit` |
+| `bun run fixtures:refresh` | Re-download the HTML fixtures tests parse against |
 
-## Learn More
+If `typecheck` fails citing files that no longer exist, delete the stale
+build cache first: `rm -rf .next`.
 
-To learn more about Next.js, take a look at the following resources:
+## Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Next.js (App Router) on Bun, TypeScript in strict mode with
+`noUncheckedIndexedAccess`, next-intl for English/Indonesian localisation,
+Tailwind CSS, and MapLibre GL for the ash-direction map. The display timezone
+is locked to `Asia/Jakarta` regardless of visitor location, since a hazard
+report timed to the wrong zone is worse than no time at all.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Design documents
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Design spec](docs/superpowers/specs/2026-09-06-anak-krakatau-dashboard-design.md)
+- [Implementation plan](docs/superpowers/plans/2026-09-06-anak-krakatau-dashboard.md)
