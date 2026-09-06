@@ -1,3 +1,4 @@
+import { TriangleAlert } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { SourceFooter } from '@/components/source-footer'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +24,10 @@ export async function StatusCard({ locale }: { locale: Locale }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('heading')}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <TriangleAlert aria-hidden="true" className="size-5 shrink-0" />
+            {t('heading')}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm">{tSource('unavailable')}</p>
@@ -51,7 +55,10 @@ export async function StatusCard({ locale }: { locale: Locale }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('heading')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <TriangleAlert aria-hidden="true" className="size-5 shrink-0" />
+          {t('heading')}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {/* Level is never signalled by colour alone: numeral + label + badge. */}

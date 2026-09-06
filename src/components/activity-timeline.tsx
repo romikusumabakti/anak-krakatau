@@ -1,3 +1,4 @@
+import { History } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { SourceFooter } from '@/components/source-footer'
 import { Badge } from '@/components/ui/badge'
@@ -18,7 +19,10 @@ export async function ActivityTimeline({ locale }: { locale: Locale }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('heading')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <History aria-hidden="true" className="size-5 shrink-0" />
+          {t('heading')}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {/* `entries` is empty only when BOTH feeds failed: getEruptions and

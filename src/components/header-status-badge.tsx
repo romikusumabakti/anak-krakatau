@@ -1,3 +1,4 @@
+import { CloudOff } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { Badge } from '@/components/ui/badge'
 import { getStatus } from '@/lib/sources/status'
@@ -36,7 +37,9 @@ export async function HeaderStatusBadge() {
         target="_blank"
       >
         <Badge className={`${COLOUR_STYLES.unknown} shrink-0 gap-1`}>
-          <span aria-hidden="true">?</span>
+          {/* A connectivity failure, not a hazard state -- deliberately not
+              a warning triangle, which would read as a claim about the volcano. */}
+          <CloudOff aria-hidden="true" className="size-3.5 shrink-0" />
           <span>{t('unavailable')}</span>
         </Badge>
       </a>

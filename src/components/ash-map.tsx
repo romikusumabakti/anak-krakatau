@@ -1,3 +1,4 @@
+import { Wind } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 import { AshMapLoader } from '@/components/ash-map-loader'
 import { SourceFooter } from '@/components/source-footer'
@@ -18,7 +19,10 @@ export async function AshMap({ locale }: { locale: Locale }) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('heading')}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Wind aria-hidden="true" className="size-5 shrink-0" />
+            {t('heading')}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground text-sm">{tSource('unavailable')}</p>
@@ -52,7 +56,10 @@ export async function AshMap({ locale }: { locale: Locale }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('heading')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <Wind aria-hidden="true" className="size-5 shrink-0" />
+          {t('heading')}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <AshMapLoader
